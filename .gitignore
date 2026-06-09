@@ -4,4 +4,5 @@ node_modules/
 *.db-shm
 uploads/*
 !uploads/.gitkeep
+!uploads/logo.png
 .env
