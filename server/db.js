@@ -108,11 +108,8 @@ async function initDb() {
       for (const [g, f] of govs) await db.run("INSERT INTO shipping_rates (governorate, fee) VALUES ($1, $2) ON CONFLICT DO NOTHING", [g, f]);
     }
 
-    const prodCount = await db.get('SELECT COUNT(*) as count FROM products');
-    if (parseInt(prodCount.count) === 0) {
-      const prods = [['Urban Edge Tee','Oversized cotton tee with signature JIO print',350,'T-Shirts','','S, M, L, XL','Black, White, Grey'],['Monochrome Hoodie','Premium heavyweight fleece hoodie',850,'Hoodies','','M, L, XL','Black, Cream, Brown'],['Nightfall Jacket','Water-resistant techwear jacket',1500,'Outerwear','','M, L, XL','Black, Olive'],['JIO Logo Cap','Structured 6-panel dad cap',250,'Accessories','','One Size','Black, Beige'],['Cargo Pants','Multi-pocket loose fit cargo pants',700,'Bottoms','','S, M, L, XL','Black, Khaki'],['Limited Edition Tee','Drop #001 - numbered edition',450,'T-Shirts','','S, M, L, XL','Black, White']];
-      for (const [n,d,p,c,i,s,col] of prods) await db.run("INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES ($1, $2, $3, $4, $5, $6, $7)", [n,d,p,c,i,s,col]);
-    }
+    const prods = [['Urban Edge Tee','Oversized cotton tee with signature JIO print',350,'T-Shirts','','S, M, L, XL','Black, White, Grey'],['Monochrome Hoodie','Premium heavyweight fleece hoodie',850,'Hoodies','','M, L, XL','Black, Cream, Brown'],['Nightfall Jacket','Water-resistant techwear jacket',1500,'Outerwear','','M, L, XL','Black, Olive'],['JIO Logo Cap','Structured 6-panel dad cap',250,'Accessories','','One Size','Black, Beige'],['Cargo Pants','Multi-pocket loose fit cargo pants',700,'Bottoms','','S, M, L, XL','Black, Khaki'],['Limited Edition Tee','Drop #001 - numbered edition',450,'T-Shirts','','S, M, L, XL','Black, White']];
+    for (const [n,d,p,c,i,s,col] of prods) await db.run("INSERT INTO products (name, description, price, category, image, sizes, colors) SELECT $1, $2, $3, $4, $5, $6, $7 WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = $8)", [n,d,p,c,i,s,col,n]);
   } else {
     // SQLite path
     const path = require('path');
@@ -157,15 +154,9 @@ async function initDb() {
       for (const [g,f] of govs) ins.run(g,f);
     }
 
-    if (sqlite.prepare('SELECT COUNT(*) as count FROM products').get().count === 0) {
-      const insP = sqlite.prepare('INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?)');
-      insP.run('Urban Edge Tee','Oversized cotton tee with signature JIO print',350,'T-Shirts','','S, M, L, XL','Black, White, Grey');
-      insP.run('Monochrome Hoodie','Premium heavyweight fleece hoodie',850,'Hoodies','','M, L, XL','Black, Cream, Brown');
-      insP.run('Nightfall Jacket','Water-resistant techwear jacket',1500,'Outerwear','','M, L, XL','Black, Olive');
-      insP.run('JIO Logo Cap','Structured 6-panel dad cap',250,'Accessories','','One Size','Black, Beige');
-      insP.run('Cargo Pants','Multi-pocket loose fit cargo pants',700,'Bottoms','','S, M, L, XL','Black, Khaki');
-      insP.run('Limited Edition Tee','Drop #001 - numbered edition',450,'T-Shirts','','S, M, L, XL','Black, White');
-    }
+    const sampleProds = [['Urban Edge Tee','Oversized cotton tee with signature JIO print',350,'T-Shirts','','S, M, L, XL','Black, White, Grey'],['Monochrome Hoodie','Premium heavyweight fleece hoodie',850,'Hoodies','','M, L, XL','Black, Cream, Brown'],['Nightfall Jacket','Water-resistant techwear jacket',1500,'Outerwear','','M, L, XL','Black, Olive'],['JIO Logo Cap','Structured 6-panel dad cap',250,'Accessories','','One Size','Black, Beige'],['Cargo Pants','Multi-pocket loose fit cargo pants',700,'Bottoms','','S, M, L, XL','Black, Khaki'],['Limited Edition Tee','Drop #001 - numbered edition',450,'T-Shirts','','S, M, L, XL','Black, White']];
+    const insP = sqlite.prepare('INSERT INTO products (name, description, price, category, image, sizes, colors) SELECT ?, ?, ?, ?, ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM products WHERE name = ?)');
+    for (const [n,d,p,c,i,s,col] of sampleProds) insP.run(n,d,p,c,i,s,col,n);
   }
 }
 
