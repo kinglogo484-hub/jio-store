@@ -97,6 +97,7 @@ async function initDb() {
     for (const [k, v] of defSettings) await db.run("INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING", [k, v]);
 
     const payCount = await db.get('SELECT COUNT(*) as count FROM payment_info');
+    await db.run("INSERT INTO payment_info (method, number, holder_name) SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM payment_info WHERE method = 'Cash on Delivery')", ['Cash on Delivery', '—', 'Pay when received']);
     if (parseInt(payCount.count) === 0) {
       await db.run("INSERT INTO payment_info (method, number, holder_name) VALUES ($1, $2, $3)", ['Vodafone Cash', '01000000000', 'JIO Store']);
       await db.run("INSERT INTO payment_info (method, number, holder_name) VALUES ($1, $2, $3)", ['InstaPay', 'jio@instapay.com', 'JIO Store']);
@@ -142,6 +143,8 @@ async function initDb() {
     const insS = sqlite.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
     for (const [k,v] of defS) insS.run(k,v);
 
+    const insPcash = sqlite.prepare("INSERT INTO payment_info (method, number, holder_name) SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM payment_info WHERE method = 'Cash on Delivery')");
+    insPcash.run('Cash on Delivery', '—', 'Pay when received');
     if (sqlite.prepare('SELECT COUNT(*) as count FROM payment_info').get().count === 0) {
       const insP = sqlite.prepare('INSERT INTO payment_info (method, number, holder_name) VALUES (?, ?, ?)');
       insP.run('Vodafone Cash', '01000000000', 'JIO Store');

@@ -508,6 +508,37 @@ tr:hover td {
   color: #3d2b1f;
 }
 
+/* Tag Selector */
+.tag-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.tag-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid #d4c5a9;
+  font-size: 11px;
+  color: rgba(61,43,31,0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #ffffff;
+  user-select: none;
+}
+.tag-option:hover {
+  border-color: #6b4423;
+  color: #3d2b1f;
+}
+.tag-option input { display: none; }
+.tag-option:has(input:checked) {
+  background: #6b4423;
+  color: #f5f0e8;
+  border-color: #6b4423;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f5f0e8; }

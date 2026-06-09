@@ -176,8 +176,10 @@ productForm.addEventListener('submit', async e => {
   fd.append('description', document.getElementById('prodDesc').value);
   fd.append('price', document.getElementById('prodPrice').value);
   fd.append('category', document.getElementById('prodCategory').value);
-  fd.append('sizes', document.getElementById('prodSizes').value);
-  fd.append('colors', document.getElementById('prodColors').value);
+  const sizes = [...document.querySelectorAll('#sizeSelector input:checked')].map(c => c.value).join(', ');
+  const colors = [...document.querySelectorAll('#colorSelector input:checked')].map(c => c.value).join(', ');
+  fd.append('sizes', sizes);
+  fd.append('colors', colors);
   const fileInput = document.getElementById('prodImage');
   if (fileInput.files.length > 0) {
     fd.append('image', fileInput.files[0]);
@@ -202,8 +204,11 @@ window.editProduct = async function(id) {
     document.getElementById('prodDesc').value = p.description;
     document.getElementById('prodPrice').value = p.price;
     document.getElementById('prodCategory').value = p.category;
-    document.getElementById('prodSizes').value = p.sizes || '';
-    document.getElementById('prodColors').value = p.colors || '';
+    // Check the correct sizes/colors
+    const sizeVals = (p.sizes || '').split(',').map(s => s.trim());
+    document.querySelectorAll('#sizeSelector input').forEach(c => c.checked = sizeVals.includes(c.value));
+    const colorVals = (p.colors || '').split(',').map(c => c.trim());
+    document.querySelectorAll('#colorSelector input').forEach(c => c.checked = colorVals.includes(c.value));
     document.getElementById('prodImage').value = '';
     document.getElementById('currentImage').innerHTML = p.image ? `Current: <a href="${p.image}" target="_blank" style="color:#6b4423">${p.image}</a>` : 'No image';
     productModalTitle.textContent = 'Edit Product';

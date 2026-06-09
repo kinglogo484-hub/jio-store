@@ -197,7 +197,10 @@ function openCheckout() {
 function renderPaymentMethods() {
   paymentSelect.innerHTML = payments
     .filter(p => p.is_active)
-    .map(p => `<option value="${p.method} - ${p.number}">${p.method} (${p.number})</option>`)
+    .map(p => {
+      const display = p.method === 'Cash on Delivery' ? p.method : `${p.method} (${p.number})`;
+      return `<option value="${p.method}">${display}</option>`;
+    })
     .join('');
 }
 

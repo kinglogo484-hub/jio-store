@@ -134,8 +134,41 @@
         <div class="form-group"><label>Price (EGP) *</label><input type="number" id="prodPrice" step="0.01" required></div>
         <div class="form-group half-row">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div><label>Sizes</label><input type="text" id="prodSizes" placeholder="e.g. S, M, L, XL"></div>
-            <div><label>Colors</label><input type="text" id="prodColors" placeholder="e.g. Black, White, Navy"></div>
+            <div>
+              <label>Sizes</label>
+              <div class="tag-selector" id="sizeSelector">
+                <label class="tag-option"><input type="checkbox" value="S"> S</label>
+                <label class="tag-option"><input type="checkbox" value="M"> M</label>
+                <label class="tag-option"><input type="checkbox" value="L"> L</label>
+                <label class="tag-option"><input type="checkbox" value="XL"> XL</label>
+                <label class="tag-option"><input type="checkbox" value="2XL"> 2XL</label>
+                <label class="tag-option"><input type="checkbox" value="3XL"> 3XL</label>
+                <label class="tag-option"><input type="checkbox" value="One Size"> One Size</label>
+              </div>
+              <input type="hidden" id="prodSizes">
+            </div>
+            <div>
+              <label>Colors</label>
+              <div class="tag-selector" id="colorSelector">
+                <label class="tag-option"><input type="checkbox" value="Black"> Black</label>
+                <label class="tag-option"><input type="checkbox" value="White"> White</label>
+                <label class="tag-option"><input type="checkbox" value="Grey"> Grey</label>
+                <label class="tag-option"><input type="checkbox" value="Navy"> Navy</label>
+                <label class="tag-option"><input type="checkbox" value="Red"> Red</label>
+                <label class="tag-option"><input type="checkbox" value="Blue"> Blue</label>
+                <label class="tag-option"><input type="checkbox" value="Green"> Green</label>
+                <label class="tag-option"><input type="checkbox" value="Beige"> Beige</label>
+                <label class="tag-option"><input type="checkbox" value="Cream"> Cream</label>
+                <label class="tag-option"><input type="checkbox" value="Brown"> Brown</label>
+                <label class="tag-option"><input type="checkbox" value="Olive"> Olive</label>
+                <label class="tag-option"><input type="checkbox" value="Khaki"> Khaki</label>
+                <label class="tag-option"><input type="checkbox" value="Pink"> Pink</label>
+                <label class="tag-option"><input type="checkbox" value="Purple"> Purple</label>
+                <label class="tag-option"><input type="checkbox" value="Orange"> Orange</label>
+                <label class="tag-option"><input type="checkbox" value="Yellow"> Yellow</label>
+              </div>
+              <input type="hidden" id="prodColors">
+            </div>
           </div>
         </div>
         <div class="form-group"><label>Category</label>
