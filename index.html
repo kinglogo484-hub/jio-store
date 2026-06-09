@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIO - Redefine Your Style</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav>
+    <div class="logo"><img src="/uploads/logo.png" alt="JIO" class="logo-img"></div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" class="cart-btn" id="cartBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </a>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </nav>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="cart-close" id="cartClose">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="cart-empty">Your cart is empty</p>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cartTotal">EGP 0</span>
+      </div>
+      <button class="btn" id="checkoutBtn">Checkout</button>
+    </div>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal" id="productDetailModal">
+    <div class="modal-content modal-detail">
+      <button class="modal-close" id="detailClose">&times;</button>
+      <div class="detail-layout" id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div class="modal" id="checkoutModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h2>Complete Your Order</h2>
+      <form id="checkoutForm">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="custName" required placeholder="e.g. Ahmed Ali">
+        </div>
+        <div class="form-group">
+          <label>Phone Number *</label>
+          <input type="tel" id="custPhone" required placeholder="e.g. 01012345678">
+        </div>
+        <div class="form-group">
+          <label>Governorate</label>
+          <select id="custGovernorate"><option value="">Select governorate</option></select>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="custAddress" rows="2" placeholder="Street, building..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="paymentMethod"></select>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" id="orderNotes" placeholder="Color, size, etc.">
+        </div>
+        <div class="order-summary" id="orderSummary"></div>
+        <button type="submit" class="btn btn-full">Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Success Modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-content modal-success">
+      <div class="success-icon">&#10003;</div>
+      <h2>Order Placed!</h2>
+      <p>Thank you for your order. We'll contact you soon.</p>
+      <button class="btn" id="successClose">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section id="home" class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-logo"><img src="/uploads/logo.png" alt="JIO" class="hero-logo-img"></div>
+      <p class="hero-subtitle">EST. 2026</p>
+      <h1>Redefine Your Style</h1>
+      <p class="hero-desc">Premium streetwear crafted for those who dare to stand out.</p>
+      <a href="#products" class="btn">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section id="products" class="products">
+    <h2 class="section-title">Shop Collection</h2>
+    <p class="section-sub">Premium streetwear, made for you</p>
+    <div class="product-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="T-Shirts">T-Shirts</button>
+      <button class="filter-btn" data-filter="Hoodies">Hoodies</button>
+      <button class="filter-btn" data-filter="Outerwear">Outerwear</button>
+      <button class="filter-btn" data-filter="Bottoms">Bottoms</button>
+      <button class="filter-btn" data-filter="Accessories">Accessories</button>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <!-- Banner -->
+  <section class="banner">
+    <div class="banner-content">
+      <h2 id="storeName">Free Shipping on Orders Over $100</h2>
+      <p>Worldwide delivery · Easy returns · 24/7 support</p>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="about">
+    <div class="about-text">
+      <h2 class="section-title">The Vision</h2>
+      <p>JIO was born from the belief that clothing is more than fabric — it's identity. We merge street culture with high-end craftsmanship to create pieces that speak louder than words.</p>
+      <p>Every stitch, every cut, every detail is intentional. Wear your story.</p>
+      <div class="stats">
+        <div class="stat"><span class="stat-num">50K+</span><span>Customers</span></div>
+        <div class="stat"><span class="stat-num">40+</span><span>Countries</span></div>
+        <div class="stat"><span class="stat-num">4.9</span><span>Rating</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="contact">
+    <h2 class="section-title">Stay Connected</h2>
+    <p class="section-sub">Be the first to know about drops and exclusives.</p>
+    <form class="contact-form" id="subscribeForm">
+      <input type="email" placeholder="Enter your email" required>
+      <button type="submit" class="btn">Subscribe</button>
+    </form>
+    <div class="social-links">
+      <a href="#">Instagram</a>
+      <a href="#">TikTok</a>
+      <a href="#">Twitter / X</a>
+      <a href="#">YouTube</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 JIO. All rights reserved. <a href="/admin" target="_blank" style="color:rgba(61,43,31,0.2);text-decoration:none;font-size:11px;margin-left:8px;">Admin</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JIO - Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Login -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo"><img src="/uploads/logo.png" alt="JIO" class="login-logo-img"></div>
+      <h2>Admin Login</h2>
+      <form id="loginForm">
+        <input type="text" id="loginUser" placeholder="Username" required>
+        <input type="password" id="loginPass" placeholder="Password" required>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+
+  <!-- Admin App -->
+  <div class="admin-app" id="adminApp" style="display:none">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><img src="/uploads/logo.png" alt="JIO" class="sidebar-logo-img"></div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="dashboard">Dashboard</a>
+        <a href="#" class="nav-item" data-tab="products">Products</a>
+        <a href="#" class="nav-item" data-tab="orders">Orders</a>
+        <a href="#" class="nav-item" data-tab="payments">Payment Info</a>
+        <a href="#" class="nav-item" data-tab="shipping">Shipping</a>
+        <a href="#" class="nav-item" data-tab="settings">Settings</a>
+      </nav>
+      <button class="btn btn-logout" id="logoutBtn">Logout</button>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle">&equiv;</button>
+        <h2 id="pageTitle">Dashboard</h2>
+        <span class="topbar-date" id="topbarDate"></span>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <section class="tab-content active" id="tab-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label">Total Orders</span><span class="stat-value" id="statOrders">0</span></div>
+            <div class="stat-card"><span class="stat-label">Pending</span><span class="stat-value" id="statPending">0</span></div>
+            <div class="stat-card"><span class="stat-label">Completed</span><span class="stat-value" id="statCompleted">0</span></div>
+            <div class="stat-card"><span class="stat-label">Revenue</span><span class="stat-value" id="statRevenue">EGP 0</span></div>
+            <div class="stat-card"><span class="stat-label">Products</span><span class="stat-value" id="statProducts">0</span></div>
+            <div class="stat-card"><span class="stat-label">Customers</span><span class="stat-value" id="statCustomers">0</span></div>
+          </div>
+          <div class="recent-orders">
+            <h3>Recent Orders</h3>
+            <div class="table-wrap"><table id="recentOrdersTable"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- Products -->
+        <section class="tab-content" id="tab-products">
+          <div class="section-header">
+            <h3>All Products</h3>
+            <button class="btn" id="addProductBtn">+ Add Product</button>
+          </div>
+          <div class="table-wrap"><table id="productsTable"><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </section>
+
+        <!-- Orders -->
+        <section class="tab-content" id="tab-orders">
+          <div class="section-header">
+            <h3>All Orders</h3>
+            <div class="order-filters">
+              <button class="filter-btn active" data-status="all">All</button>
+              <button class="filter-btn" data-status="pending">Pending</button>
+              <button class="filter-btn" data-status="completed">Completed</button>
+              <button class="filter-btn" data-status="cancelled">Cancelled</button>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="ordersTable"><thead><tr><th>ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </section>
+
+        <!-- Payments -->
+        <section class="tab-content" id="tab-payments">
+          <div class="section-header">
+            <h3>Payment Methods</h3>
+            <button class="btn" id="addPaymentBtn">+ Add Payment</button>
+          </div>
+          <div class="table-wrap"><table id="paymentsTable"><thead><tr><th>ID</th><th>Method</th><th>Number</th><th>Holder</th><th>Active</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </section>
+
+        <!-- Shipping -->
+        <section class="tab-content" id="tab-shipping">
+          <div class="section-header">
+            <h3>Shipping Rates by Governorate</h3>
+            <button class="btn" id="addShippingBtn">+ Add Governorate</button>
+          </div>
+          <div class="table-wrap"><table id="shippingTable"><thead><tr><th>ID</th><th>Governorate</th><th>Fee (EGP)</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </section>
+
+        <!-- Settings -->
+        <section class="tab-content" id="tab-settings">
+          <h3>Store Settings</h3>
+          <form id="settingsForm">
+            <div class="settings-grid">
+              <div class="form-group"><label>Store Name</label><input type="text" id="set_store_name"></div>
+              <div class="form-group"><label>Currency</label><input type="text" id="set_currency"></div>
+              <div class="form-group"><label>Shipping Fee (EGP)</label><input type="number" id="set_shipping_fee" step="0.01"></div>
+              <div class="form-group"><label>Min Order Amount</label><input type="number" id="set_min_order_amount" step="0.01"></div>
+              <div class="form-group"><label>Max Order Amount</label><input type="number" id="set_max_order_amount" step="0.01"></div>
+              <div class="form-group"><label>Store Phone</label><input type="text" id="set_phone"></div>
+            </div>
+            <button type="submit" class="btn">Save Settings</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <button class="modal-close" id="productModalClose">&times;</button>
+      <h3 id="productModalTitle">Add Product</h3>
+      <form id="productForm" enctype="multipart/form-data">
+        <input type="hidden" id="productId">
+        <div class="form-group"><label>Product Name *</label><input type="text" id="prodName" required></div>
+        <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2"></textarea></div>
+        <div class="form-group"><label>Price (EGP) *</label><input type="number" id="prodPrice" step="0.01" required></div>
+        <div class="form-group half-row">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label>Sizes</label><input type="text" id="prodSizes" placeholder="e.g. S, M, L, XL"></div>
+            <div><label>Colors</label><input type="text" id="prodColors" placeholder="e.g. Black, White, Navy"></div>
+          </div>
+        </div>
+        <div class="form-group"><label>Category</label>
+          <select id="prodCategory">
+            <option value="T-Shirts">T-Shirts</option>
+            <option value="Hoodies">Hoodies</option>
+            <option value="Outerwear">Outerwear</option>
+            <option value="Bottoms">Bottoms</option>
+            <option value="Accessories">Accessories</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Product Image</label>
+          <input type="file" id="prodImage" accept="image/*">
+          <div id="currentImage" style="margin-top:8px;font-size:12px;color:rgba(61,43,31,0.4)"></div>
+        </div>
+        <button type="submit" class="btn btn-full">Save Product</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <button class="modal-close" id="paymentModalClose">&times;</button>
+      <h3 id="paymentModalTitle">Add Payment Method</h3>
+      <form id="paymentForm">
+        <input type="hidden" id="paymentId">
+        <div class="form-group"><label>Method Name *</label><input type="text" id="payMethod" required placeholder="e.g. Vodafone Cash"></div>
+        <div class="form-group"><label>Number / Account *</label><input type="text" id="payNumber" required placeholder="e.g. 01000000000"></div>
+        <div class="form-group"><label>Holder Name</label><input type="text" id="payHolder" placeholder="e.g. JIO Store"></div>
+        <button type="submit" class="btn btn-full">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shipping Modal -->
+  <div class="modal" id="shippingModal">
+    <div class="modal-content">
+      <button class="modal-close" id="shippingModalClose">&times;</button>
+      <h3 id="shippingModalTitle">Add Governorate</h3>
+      <form id="shippingForm">
+        <input type="hidden" id="shippingId">
+        <div class="form-group"><label>Governorate Name *</label><input type="text" id="shipGov" required placeholder="e.g. Cairo"></div>
+        <div class="form-group"><label>Shipping Fee (EGP) *</label><input type="number" id="shipFee" step="0.01" required placeholder="e.g. 40"></div>
+        <button type="submit" class="btn btn-full">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content">
+      <button class="modal-close" id="orderModalClose">&times;</button>
+      <h3>Order Details</h3>
+      <div id="orderDetail"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
