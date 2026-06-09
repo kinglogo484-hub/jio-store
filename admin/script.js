@@ -232,11 +232,20 @@ async function loadOrders(filter = 'all') {
     const url = filter === 'all' ? '/api/orders' : `/api/orders?status=${filter}`;
     allOrders = await API.get(url);
     const tbody = document.querySelector('#ordersTable tbody');
-    tbody.innerHTML = allOrders.map(o => `
+    tbody.innerHTML = allOrders.map(o => {
+      const addrParts = o.customer_address ? o.customer_address.split(' - ') : [];
+      const governorate = addrParts.length > 1 ? addrParts[0] : '';
+      const address = addrParts.length > 1 ? addrParts.slice(1).join(' - ') : (o.customer_address || '');
+      const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+      const itemsSummary = items.map(i => `${i.name}${i.size ? ' ('+i.size+')' : ''}${i.color ? ' - '+i.color : ''} x${i.qty}`).join(', ');
+      return `
       <tr>
         <td>#${o.id}</td>
         <td><strong>${o.customer_name}</strong></td>
         <td>${o.customer_phone}</td>
+        <td>${governorate || '-'}</td>
+        <td>${address || '-'}</td>
+        <td style="max-width:200px;white-space:normal;word-break:break-word">${itemsSummary || '-'}</td>
         <td>EGP ${Number(o.total).toFixed(2)}</td>
         <td>${o.payment_method || '-'}</td>
         <td><span class="status-badge status-${o.status}">${o.status}</span></td>
@@ -247,8 +256,8 @@ async function loadOrders(filter = 'all') {
           ${o.status !== 'cancelled' ? `<button class="action-btn danger" onclick="cancelOrder(${o.id})">Cancel</button>` : ''}
           <button class="action-btn danger" onclick="deleteOrder(${o.id})">Delete</button>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   } catch (e) { console.error(e); }
 }
 
@@ -265,6 +274,9 @@ window.viewOrder = async function(id) {
     const o = await API.get(`/api/orders/${id}`);
     const items = typeof o.items === 'string' ? JSON.parse(o.items) : o.items;
     const modal = document.getElementById('orderModal');
+    const addrParts = o.customer_address ? o.customer_address.split(' - ') : [];
+    const governorate = addrParts.length > 1 ? addrParts[0] : '';
+    const address = addrParts.length > 1 ? addrParts.slice(1).join(' - ') : (o.customer_address || '');
     document.getElementById('orderDetail').innerHTML = `
       <div class="order-detail-section">
         <div class="label">Order ID</div>
@@ -278,7 +290,8 @@ window.viewOrder = async function(id) {
         <div class="label">Phone</div>
         <div class="value">${o.customer_phone}</div>
       </div>
-      ${o.customer_address ? `<div class="order-detail-section"><div class="label">Address</div><div class="value">${o.customer_address}</div></div>` : ''}
+      ${governorate ? `<div class="order-detail-section"><div class="label">Governorate</div><div class="value">${governorate}</div></div>` : ''}
+      ${address ? `<div class="order-detail-section"><div class="label">Address</div><div class="value">${address}</div></div>` : ''}
       <div class="order-detail-section">
         <div class="label">Payment Method</div>
         <div class="value">${o.payment_method || '-'}</div>
@@ -290,8 +303,8 @@ window.viewOrder = async function(id) {
       <div class="order-detail-section">
         <div class="label">Items</div>
         <table class="order-items-table">
-          <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-          <tbody>${items.map(i => `<tr><td>${i.name}</td><td>${i.qty}</td><td>EGP ${Number(i.price).toFixed(2)}</td><td>EGP ${(i.price * i.qty).toFixed(2)}</td></tr>`).join('')}</tbody>
+          <thead><tr><th>Item</th><th>Size</th><th>Color</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+          <tbody>${items.map(i => `<tr><td>${i.name}</td><td>${i.size || '-'}</td><td>${i.color || '-'}</td><td>${i.qty}</td><td>EGP ${Number(i.price).toFixed(2)}</td><td>EGP ${(i.price * i.qty).toFixed(2)}</td></tr>`).join('')}</tbody>
         </table>
       </div>
       <div class="order-detail-section">

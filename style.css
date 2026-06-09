@@ -203,6 +203,22 @@ nav.scrolled {
   text-align: center;
 }
 
+#checkoutForm .btn-full {
+  background: #3d2b1f;
+  color: #f5f0e8;
+  border-color: #3d2b1f;
+  font-size: 16px;
+  padding: 16px 40px;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 12px rgba(61,43,31,0.3);
+}
+
+#checkoutForm .btn-full:hover {
+  background: #5a3825;
+  border-color: #5a3825;
+  box-shadow: 0 4px 20px rgba(61,43,31,0.4);
+}
+
 /* Products */
 .products {
   padding: 120px 60px;
