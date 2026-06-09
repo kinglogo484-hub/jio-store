@@ -9,6 +9,5 @@ RUN npm install --omit=dev
 
 COPY . .
 ENV SQLITE_PATH=/data/jio_store.db
-VOLUME /data
 EXPOSE 3000
 CMD ["node", "server/server.js"]
