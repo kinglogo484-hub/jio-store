@@ -284,7 +284,13 @@ function setupEventListeners() {
     if (btn) {
       const id = parseInt(btn.dataset.id);
       const product = products.find(p => p.id === id);
-      if (product) addToCart(product);
+      if (!product) return;
+      const sizes = product.sizes ? product.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const colors = product.colors ? product.colors.split(',').map(c => c.trim()).filter(Boolean) : [];
+      const opts = selectedOptions[product.id] || {};
+      if (sizes.length && !opts.size) { alert('Please select a size'); return; }
+      if (colors.length && !opts.color) { alert('Please select a color'); return; }
+      addToCart(product);
     }
   });
 
@@ -412,8 +418,8 @@ function openProductDetail(product) {
       <p class="detail-desc">${product.description || ''}</p>
       <div class="detail-price">EGP ${Number(product.price).toFixed(2)}</div>
       <div class="detail-options">
-        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map(s => `<button class="opt-btn selected" data-type="size" data-val="${s}">${s}</button>`).join('')}</div></div>` : ''}
-        ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map(c => `<button class="opt-btn selected" data-type="color" data-val="${c}">${c}</button>`).join('')}</div></div>` : ''}
+        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map((s,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="size" data-val="${s}">${s}</button>`).join('')}</div></div>` : ''}
+        ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map((c,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="color" data-val="${c}">${c}</button>`).join('')}</div></div>` : ''}
         <div class="detail-qty">
           <label>Quantity</label>
           <div class="detail-qty-selector">
