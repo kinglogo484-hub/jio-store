@@ -162,6 +162,13 @@ document.getElementById('addProductBtn').addEventListener('click', () => {
   document.getElementById('productId').value = '';
   document.getElementById('currentImage').textContent = '';
   productModalTitle.textContent = 'Add Product';
+  // Remove custom tags
+  document.querySelectorAll('#sizeSelector .tag-option').forEach(el => {
+    if (!['S','M','L','XL','2XL','3XL','One Size'].includes(el.querySelector('input')?.value || '')) el.remove();
+  });
+  document.querySelectorAll('#colorSelector .tag-option').forEach(el => {
+    if (!['Black','White','Grey','Navy','Red','Blue','Green','Beige','Cream','Brown','Olive','Khaki','Pink','Purple','Orange','Yellow'].includes(el.querySelector('input')?.value || '')) el.remove();
+  });
   productModal.classList.add('show');
 });
 
@@ -205,10 +212,28 @@ window.editProduct = async function(id) {
     document.getElementById('prodPrice').value = p.price;
     document.getElementById('prodCategory').value = p.category;
     // Check the correct sizes/colors
-    const sizeVals = (p.sizes || '').split(',').map(s => s.trim());
-    document.querySelectorAll('#sizeSelector input').forEach(c => c.checked = sizeVals.includes(c.value));
-    const colorVals = (p.colors || '').split(',').map(c => c.trim());
-    document.querySelectorAll('#colorSelector input').forEach(c => c.checked = colorVals.includes(c.value));
+    const sizeVals = (p.sizes || '').split(',').map(s => s.trim()).filter(Boolean);
+    const sizeInputs = document.querySelectorAll('#sizeSelector input');
+    sizeInputs.forEach(c => c.checked = sizeVals.includes(c.value));
+    sizeVals.forEach(v => {
+      if (![...sizeInputs].some(c => c.value === v)) {
+        const label = document.createElement('label');
+        label.className = 'tag-option';
+        label.innerHTML = `<input type="checkbox" value="${v.replace(/"/g, '&quot;')}" checked> ${v} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
+        document.getElementById('sizeSelector').appendChild(label);
+      }
+    });
+    const colorVals = (p.colors || '').split(',').map(c => c.trim()).filter(Boolean);
+    const colorInputs = document.querySelectorAll('#colorSelector input');
+    colorInputs.forEach(c => c.checked = colorVals.includes(c.value));
+    colorVals.forEach(v => {
+      if (![...colorInputs].some(c => c.value === v)) {
+        const label = document.createElement('label');
+        label.className = 'tag-option';
+        label.innerHTML = `<input type="checkbox" value="${v.replace(/"/g, '&quot;')}" checked> ${v} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
+        document.getElementById('colorSelector').appendChild(label);
+      }
+    });
     document.getElementById('prodImage').value = '';
     document.getElementById('currentImage').innerHTML = p.image ? `Current: <a href="${p.image}" target="_blank" style="color:#6b4423">${p.image}</a>` : 'No image';
     productModalTitle.textContent = 'Edit Product';
@@ -546,3 +571,22 @@ document.getElementById('settingsForm').addEventListener('submit', async e => {
     alert('Settings saved successfully!');
   } catch (e) { alert('Error saving settings'); }
 });
+
+// ===== CUSTOM SIZES & COLORS =====
+function addTag(type) {
+  const input = document.getElementById(type === 'size' ? 'newSize' : 'newColor');
+  const selector = document.getElementById(type === 'size' ? 'sizeSelector' : 'colorSelector');
+  const val = input.value.trim();
+  if (!val) return;
+  const existing = [...selector.querySelectorAll('input')].some(c => c.value.toLowerCase() === val.toLowerCase());
+  if (existing) { alert('Already exists'); return; }
+  const label = document.createElement('label');
+  label.className = 'tag-option';
+  label.innerHTML = `<input type="checkbox" value="${val.replace(/"/g, '&quot;')}" checked> ${val} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
+  selector.appendChild(label);
+  input.value = '';
+  input.focus();
+}
+
+document.getElementById('newSize').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addTag('size'); } });
+document.getElementById('newColor').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addTag('color'); } });
