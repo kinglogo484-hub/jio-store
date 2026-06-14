@@ -108,8 +108,8 @@ function renderProducts(filter = 'all') {
       <div class="product-info">
         <h3>${p.name}</h3>
         <p class="desc">${p.description || ''}</p>
-        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map(s => `<button class="opt-btn ${sel.size === s ? 'selected' : ''}" data-pid="${p.id}" data-type="size" data-val="${s}">${s}</button>`).join('')}</div></div>` : ''}
-        ${colors.length ? `<div class="opt-group"><span class="opt-label">Color</span><div class="opt-options">${colors.map(c => `<button class="opt-btn ${sel.color === c ? 'selected' : ''}" data-pid="${p.id}" data-type="color" data-val="${c}">${c}</button>`).join('')}</div></div>` : ''}
+        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map(s => `<button class="opt-btn ${sel.size === s ? 'selected' : ''}" data-pid="${p.id}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
+        ${colors.length ? `<div class="opt-group"><span class="opt-label">Color</span><div class="opt-options">${colors.map(c => `<button class="opt-btn ${sel.color === c ? 'selected' : ''}" data-pid="${p.id}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
         <div class="price">EGP ${Number(p.price).toFixed(2)}</div>
         <button class="add-to-cart" data-id="${p.id}">Add to Cart</button>
       </div>
@@ -134,7 +134,7 @@ function renderCart() {
       <div class="cart-item-info">
         <h4>${item.name}</h4>
         <div class="item-price">EGP ${Number(item.price).toFixed(2)}</div>
-        ${item.selectedSize || item.selectedColor ? `<div style="font-size:11px;color:rgba(61,43,31,0.4);margin-bottom:4px">${item.selectedSize ? item.selectedSize : ''}${item.selectedSize && item.selectedColor ? ' / ' : ''}${item.selectedColor ? item.selectedColor : ''}</div>` : ''}
+        ${item.selectedSize || item.selectedColor ? `<div style="font-size:11px;color:rgba(61,43,31,0.4);margin-bottom:4px" translate="no">${item.selectedSize ? item.selectedSize : ''}${item.selectedSize && item.selectedColor ? ' / ' : ''}${item.selectedColor ? item.selectedColor : ''}</div>` : ''}
         <div class="cart-item-actions">
           <button class="qty-btn" data-index="${idx}" data-action="dec">-</button>
           <span class="item-qty">${item.qty}</span>
@@ -207,7 +207,7 @@ function renderPaymentMethods() {
 function renderOrderSummary() {
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   orderSummary.innerHTML = `
-    ${cart.map(i => `<div class="summary-line"><span>${i.name}${i.selectedSize ? ' (' + i.selectedSize : ''}${i.selectedColor ? (i.selectedSize ? ', ' : ' (') + i.selectedColor : ''}${i.selectedSize || i.selectedColor ? ')' : ''} x${i.qty}</span><span>EGP ${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}
+    ${cart.map(i => `<div class="summary-line"><span translate="no">${i.name}${i.selectedSize ? ' (' + i.selectedSize : ''}${i.selectedColor ? (i.selectedSize ? ', ' : ' (') + i.selectedColor : ''}${i.selectedSize || i.selectedColor ? ')' : ''} x${i.qty}</span><span>EGP ${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}
     <div class="summary-line"><span>Shipping</span><span>EGP ${shippingFee.toFixed(2)}</span></div>
     <div class="summary-total"><span>Total</span><span>EGP ${(subtotal + shippingFee).toFixed(2)}</span></div>
   `;
@@ -421,8 +421,8 @@ function openProductDetail(product) {
       <p class="detail-desc">${product.description || ''}</p>
       <div class="detail-price">EGP ${Number(product.price).toFixed(2)}</div>
       <div class="detail-options">
-        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map((s,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="size" data-val="${s}">${s}</button>`).join('')}</div></div>` : ''}
-        ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map((c,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="color" data-val="${c}">${c}</button>`).join('')}</div></div>` : ''}
+        ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map((s,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
+        ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map((c,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
         <div class="detail-qty">
           <label>Quantity</label>
           <div class="detail-qty-selector">

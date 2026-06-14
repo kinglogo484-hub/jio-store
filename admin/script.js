@@ -219,6 +219,7 @@ window.editProduct = async function(id) {
       if (![...sizeInputs].some(c => c.value === v)) {
         const label = document.createElement('label');
         label.className = 'tag-option';
+        label.setAttribute('translate', 'no');
         label.innerHTML = `<input type="checkbox" value="${v.replace(/"/g, '&quot;')}" checked> ${v} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
         document.getElementById('sizeSelector').appendChild(label);
       }
@@ -230,6 +231,7 @@ window.editProduct = async function(id) {
       if (![...colorInputs].some(c => c.value === v)) {
         const label = document.createElement('label');
         label.className = 'tag-option';
+        label.setAttribute('translate', 'no');
         label.innerHTML = `<input type="checkbox" value="${v.replace(/"/g, '&quot;')}" checked> ${v} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
         document.getElementById('colorSelector').appendChild(label);
       }
@@ -270,7 +272,7 @@ async function loadOrders(filter = 'all') {
         <td>${o.customer_phone}</td>
         <td>${governorate || '-'}</td>
         <td>${address || '-'}</td>
-        <td style="max-width:200px;white-space:normal;word-break:break-word">${itemsSummary || '-'}</td>
+        <td style="max-width:200px;white-space:normal;word-break:break-word" translate="no">${itemsSummary || '-'}</td>
         <td>EGP ${Number(o.total).toFixed(2)}</td>
         <td>${o.payment_method || '-'}</td>
         <td><span class="status-badge status-${o.status}">${o.status}</span></td>
@@ -582,6 +584,7 @@ function addTag(type) {
   if (existing) { alert('Already exists'); return; }
   const label = document.createElement('label');
   label.className = 'tag-option';
+  label.setAttribute('translate', 'no');
   label.innerHTML = `<input type="checkbox" value="${val.replace(/"/g, '&quot;')}" checked> ${val} <span onclick="this.parentElement.remove()" style="margin-left:4px;cursor:pointer;opacity:0.4">&times;</span>`;
   selector.appendChild(label);
   input.value = '';
