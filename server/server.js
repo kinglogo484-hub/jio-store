@@ -48,15 +48,20 @@ app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 async function saveImage(file) {
   if (!file) return '';
   if (s3Client && s3Bucket) {
-    const { PutObjectCommand } = require('@aws-sdk/client-s3');
-    const key = 'products/' + file.filename;
-    await s3Client.send(new PutObjectCommand({
-      Bucket: s3Bucket,
-      Key: key,
-      Body: fs.createReadStream(file.path),
-      ContentType: file.mimetype,
-    }));
-    return 's3:' + key;
+    try {
+      const { PutObjectCommand } = require('@aws-sdk/client-s3');
+      const key = 'products/' + file.filename;
+      await s3Client.send(new PutObjectCommand({
+        Bucket: s3Bucket,
+        Key: key,
+        Body: fs.createReadStream(file.path),
+        ContentType: file.mimetype,
+      }));
+      try { fs.unlinkSync(file.path); } catch(e) {}
+      return 's3:' + key;
+    } catch (e) {
+      return '/uploads/' + file.filename;
+    }
   }
   return '/uploads/' + file.filename;
 }
@@ -319,7 +324,18 @@ app.post('/api/reset-db', async (req, res) => {
 });
 
 // ========== START ==========
-initDb().then(() => {
+initDb().then(async () => {
+  try {
+    await db.get('PRAGMA integrity_check');
+  } catch (e) {
+    console.error('Database corrupted, recreating...');
+    const dbPath = process.env.SQLITE_PATH || path.join(__dirname, 'jio_store.db');
+    try { fs.renameSync(dbPath, dbPath + '.bak.' + Date.now()); } catch(e2){}
+    try { if (fs.existsSync(dbPath + '-wal')) fs.unlinkSync(dbPath + '-wal'); } catch(e2){}
+    try { if (fs.existsSync(dbPath + '-shm')) fs.unlinkSync(dbPath + '-shm'); } catch(e2){}
+    const { initDb: initAgain } = require('./db');
+    await initAgain();
+  }
   app.listen(PORT, () => {
     console.log(`JIO Store running at http://localhost:${PORT}`);
     console.log(`Admin panel at http://localhost:${PORT}/admin`);
