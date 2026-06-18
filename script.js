@@ -1,4 +1,5 @@
 // ===== STATE =====
+function imgUrl(src) { if (!src) return ''; if (src.startsWith('s3:') || src.startsWith('/uploads/')) return '/api/image/' + src.replace('/uploads/', ''); return src; }
 let products = [];
 let cart = JSON.parse(localStorage.getItem('jio_cart')) || [];
 let settings = {};
@@ -102,7 +103,7 @@ function renderProducts(filter = 'all') {
     return `
     <div class="product-card" data-id="${p.id}">
       <div class="product-img" data-initial="${p.name[0]}">
-        ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy">` : ''}
+        ${p.image ? `<img src="${imgUrl(p.image)}" alt="${p.name}" loading="lazy">` : ''}
         <span class="product-category">${p.category}</span>
       </div>
       <div class="product-info">
@@ -414,7 +415,7 @@ function openProductDetail(product) {
   const sizes = product.sizes ? product.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
   const colors = product.colors ? product.colors.split(',').map(c => c.trim()).filter(Boolean) : [];
   detailContent.innerHTML = `
-    <div class="detail-image">${product.image ? `<img src="${product.image}" alt="${product.name}">` : product.name[0]}</div>
+    <div class="detail-image">${product.image ? `<img src="${imgUrl(product.image)}" alt="${product.name}">` : product.name[0]}</div>
     <div class="detail-info">
       <span class="detail-category">${product.category}</span>
       <h2>${product.name}</h2>

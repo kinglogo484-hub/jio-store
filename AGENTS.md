@@ -27,11 +27,15 @@
 - This includes: admin tag labels, product buttons, cart items, order summary rows, orders table data cells
 - Dynamically created elements (JS `innerHTML`) must also include `translate="no"`
 
-### Uploads
+### Uploads (Railway Storage Buckets)
+- Images stored in Railway S3-compatible Storage Buckets (not local disk)
+- DB stores `s3:products/filename.ext` for S3 images, fallback to `/uploads/filename.ext`
+- Image proxy at `/api/image/:key` serves from S3 or local disk
+- Frontend uses `imgUrl()` helper to resolve image paths
 - Max file size: 20MB (multer limit + clear error message)
 - `express.json()` default limit (100kb) is sufficient for JSON payloads (file uploads are multipart via multer, not JSON)
-- Image path stored in DB as `/uploads/filename.ext`
 - `keepImage` flag should be checked when updating product without changing image
+- Bucket env vars: `BUCKET_ENDPOINT`, `BUCKET_ACCESS_KEY_ID`, `BUCKET_SECRET_ACCESS_KEY`, `BUCKET_NAME`, `BUCKET_REGION`
 
 ## Infrastructure
 

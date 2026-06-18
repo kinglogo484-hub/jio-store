@@ -11,11 +11,25 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Ensure uploads dir exists
+// S3 client (Railway Storage Bucket)
+let s3Client, s3Bucket;
+if (process.env.BUCKET_ENDPOINT && process.env.BUCKET_ACCESS_KEY_ID) {
+  const { S3Client } = require('@aws-sdk/client-s3');
+  s3Client = new S3Client({
+    region: process.env.BUCKET_REGION || 'auto',
+    endpoint: process.env.BUCKET_ENDPOINT,
+    credentials: {
+      accessKeyId: process.env.BUCKET_ACCESS_KEY_ID,
+      secretAccessKey: process.env.BUCKET_SECRET_ACCESS_KEY,
+    },
+  });
+  s3Bucket = process.env.BUCKET_NAME;
+}
+
+// Multer config (temporary local storage, then upload to S3)
 const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Multer config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
@@ -29,6 +43,54 @@ const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
 app.use(express.static(path.join(__dirname, '..')));
 app.use('/uploads', express.static(uploadsDir));
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
+
+// ========== HELPER: save uploaded file to S3 ==========
+async function saveImage(file) {
+  if (!file) return '';
+  if (s3Client && s3Bucket) {
+    const { PutObjectCommand } = require('@aws-sdk/client-s3');
+    const key = 'products/' + file.filename;
+    await s3Client.send(new PutObjectCommand({
+      Bucket: s3Bucket,
+      Key: key,
+      Body: fs.createReadStream(file.path),
+      ContentType: file.mimetype,
+    }));
+    return 's3:' + key;
+  }
+  return '/uploads/' + file.filename;
+}
+
+// ========== HELPER: resolve image path to URL ==========
+function imageUrl(image) {
+  if (!image) return '';
+  if (image.startsWith('s3:')) return '/api/image/' + image;
+  if (image.startsWith('/uploads/')) return '/api/image/' + image.replace('/uploads/', '');
+  return image;
+}
+
+// ========== IMAGE PROXY (serve from S3 or local) ==========
+app.get('/api/image/:key', async (req, res) => {
+  try {
+    const key = req.params.key;
+    if (key.startsWith('s3:')) {
+      if (!s3Client || !s3Bucket) return res.status(404).end();
+      const { GetObjectCommand } = require('@aws-sdk/client-s3');
+      const obj = await s3Client.send(new GetObjectCommand({ Bucket: s3Bucket, Key: key.slice(3) }));
+      res.set('Content-Type', obj.ContentType);
+      res.set('Cache-Control', 'public, max-age=86400');
+      obj.Body.pipe(res);
+    } else {
+      const filePath = path.join(uploadsDir, key);
+      if (!fs.existsSync(filePath)) return res.status(404).end();
+      if (filePath.endsWith('.png')) res.set('Content-Type', 'image/png');
+      else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) res.set('Content-Type', 'image/jpeg');
+      else if (filePath.endsWith('.webp')) res.set('Content-Type', 'image/webp');
+      res.set('Cache-Control', 'public, max-age=86400');
+      fs.createReadStream(filePath).pipe(res);
+    }
+  } catch (e) { res.status(404).end(); }
+});
 
 // ========== AUTH ==========
 app.post('/api/login', async (req, res) => {
@@ -53,7 +115,7 @@ app.get('/api/products/:id', async (req, res) => {
 app.post('/api/products', upload.single('image'), async (req, res) => {
   const { name, description, price, category, sizes, colors } = req.body;
   if (!name || !price) return res.status(400).json({ message: 'Name and price are required' });
-  const image = req.file ? '/uploads/' + req.file.filename : (req.body.image || '');
+  const image = await saveImage(req.file);
   const product = await db.get(
     'INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *',
     [name, description || '', parseFloat(price), category || 'general', image, sizes || '', colors || '']
@@ -66,7 +128,7 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   const existing = await db.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Product not found' });
   let image = existing.image;
-  if (req.file) image = '/uploads/' + req.file.filename;
+  if (req.file) image = await saveImage(req.file);
   else if (keepImage === 'false' || keepImage === false) image = '';
   const updated = await db.get(
     'UPDATE products SET name=?, description=?, price=?, category=?, image=?, sizes=?, colors=? WHERE id=? RETURNING *',
