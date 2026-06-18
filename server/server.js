@@ -25,16 +25,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-// Multer error handler
-app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'File too large. Max 5MB allowed.' });
-    return res.status(400).json({ message: 'Upload error: ' + err.message });
-  }
-  if (err) return res.status(500).json({ message: err.message });
-  next();
-});
-
 // Serve static files
 app.use(express.static(path.join(__dirname, '..')));
 app.use('/uploads', express.static(uploadsDir));
@@ -238,6 +228,16 @@ app.get('/api/stats', async (req, res) => {
   res.json({ totalOrders: parseInt(totalOrders), completedOrders: parseInt(completedOrders),
     pendingOrders: parseInt(pendingOrders), totalRevenue: parseFloat(totalRevenue) || 0,
     totalProducts: parseInt(totalProducts), totalCustomers: parseInt(totalCustomers) });
+});
+
+// ========== ERROR HANDLER (must be after all routes) ==========
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'File too large. Max 5MB allowed.' });
+    return res.status(400).json({ message: 'Upload error: ' + err.message });
+  }
+  if (err) return res.status(500).json({ message: err.message });
+  next();
 });
 
 // ========== START ==========

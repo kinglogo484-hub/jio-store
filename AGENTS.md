@@ -10,6 +10,7 @@
 
 ### Error Handling
 - **Multer errors need explicit handler**: `app.use((err, req, res, next) => { if (err instanceof multer.MulterError) ... })`
+- **Error handler MUST be after all routes** — in Express, `next(err)` only finds error handlers defined later in the middleware stack. If defined before routes, it never gets called.
 - Always send actual error message from server to client: `alert(e.message)` not `alert('Error')`
 
 ### DOM Event Handling
