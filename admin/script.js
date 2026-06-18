@@ -175,8 +175,15 @@ document.getElementById('addProductBtn').addEventListener('click', () => {
 productModalClose.addEventListener('click', () => productModal.classList.remove('show'));
 productModal.addEventListener('click', e => { if (e.target === productModal) productModal.classList.remove('show'); });
 
+let savingProduct = false;
 productForm.addEventListener('submit', async e => {
   e.preventDefault();
+  if (savingProduct) return;
+  savingProduct = true;
+  const btn = productForm.querySelector('button[type="submit"]');
+  const orig = btn.textContent;
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
   const id = document.getElementById('productId').value;
   const fd = new FormData();
   fd.append('name', document.getElementById('prodName').value);
@@ -196,11 +203,21 @@ productForm.addEventListener('submit', async e => {
   try {
     const url = id ? `/api/products/${id}` : '/api/products';
     const method = id ? 'PUT' : 'POST';
-    const r = await fetch(url, { method, body: fd });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000);
+    const r = await fetch(url, { method, body: fd, signal: controller.signal });
+    clearTimeout(timeout);
     if (!r.ok) throw new Error(await r.text());
     productModal.classList.remove('show');
     loadProducts();
-  } catch (e) { alert(e.message || 'Error saving product'); }
+  } catch (e) {
+    if (e.name === 'AbortError') alert('Upload timed out. Try a smaller image.');
+    else alert(e.message || 'Error saving product');
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+    savingProduct = false;
+  }
 });
 
 window.editProduct = async function(id) {
