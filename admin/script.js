@@ -200,7 +200,7 @@ productForm.addEventListener('submit', async e => {
     if (!r.ok) throw new Error(await r.text());
     productModal.classList.remove('show');
     loadProducts();
-  } catch (e) { alert('Error saving product'); }
+  } catch (e) { alert(e.message || 'Error saving product'); }
 });
 
 window.editProduct = async function(id) {
@@ -593,3 +593,5 @@ function addTag(type) {
 
 document.getElementById('newSize').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addTag('size'); } });
 document.getElementById('newColor').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addTag('color'); } });
+document.getElementById('addSizeBtn').addEventListener('click', e => { e.preventDefault(); addTag('size'); });
+document.getElementById('addColorBtn').addEventListener('click', e => { e.preventDefault(); addTag('color'); });

@@ -9,6 +9,7 @@ RUN npm install --omit=dev
 
 COPY . .
 ENV SQLITE_PATH=/data/jio_store.db
+ENV UPLOADS_PATH=/data/uploads
 RUN mkdir -p /data
 EXPOSE 3000
 CMD ["node", "server/server.js"]

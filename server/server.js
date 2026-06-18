@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Ensure uploads dir exists
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 // Multer config
@@ -24,6 +24,16 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// Multer error handler
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'File too large. Max 5MB allowed.' });
+    return res.status(400).json({ message: 'Upload error: ' + err.message });
+  }
+  if (err) return res.status(500).json({ message: err.message });
+  next();
+});
 
 // Serve static files
 app.use(express.static(path.join(__dirname, '..')));
