@@ -4,6 +4,9 @@ WORKDIR /app
 # Build deps for better-sqlite3
 RUN apt-get update -qq && apt-get install -y -qq python3 make g++ && rm -rf /var/lib/apt/lists/*
 
+# Force fresh build layer
+RUN echo "cachebuster=20260619"
+
 COPY package*.json ./
 RUN npm install --omit=dev
 
