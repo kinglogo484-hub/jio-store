@@ -23,8 +23,8 @@
 - Dynamically created elements (JS `innerHTML`) must also include `translate="no"`
 
 ### Uploads
-- Max file size: 100MB (multer limit + clear error message)
-- `express.json({ limit: '100mb' })` also increased to match
+- Max file size: 20MB (multer limit + clear error message)
+- `express.json({ limit: '20mb' })` also increased to match
 - Image path stored in DB as `/uploads/filename.ext`
 - `keepImage` flag should be checked when updating product without changing image
 
