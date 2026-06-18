@@ -4,6 +4,7 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const { db, initDb } = require('./db');
+let S3Client, GetObjectCommand;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,27 +75,60 @@ function imageUrl(image) {
   return image;
 }
 
-// ========== IMAGE PROXY (serve from S3 or local) ==========
+// ========== IMAGE PROXY (serve from local cache or S3) ==========
+const cacheDir = path.join(__dirname, '..', '.imgcache');
+if (!fs.existsSync(cacheDir)) try { fs.mkdirSync(cacheDir, { recursive: true }); } catch(e) {}
+
 app.get('/api/image/:key', async (req, res) => {
   try {
-    const key = req.params.key;
-    if (key.startsWith('s3:')) {
-      if (!s3Client || !s3Bucket) return res.status(404).end();
-      const { GetObjectCommand } = require('@aws-sdk/client-s3');
-      const obj = await s3Client.send(new GetObjectCommand({ Bucket: s3Bucket, Key: key.slice(3) }));
-      res.set('Content-Type', obj.ContentType);
+    let srcKey = req.params.key;
+    // Strip s3: prefix if present
+    if (srcKey.startsWith('s3:')) srcKey = srcKey.slice(3);
+    // Strip /uploads/ prefix if present
+    if (srcKey.startsWith('/uploads/')) srcKey = srcKey.replace('/uploads/', '');
+
+    const cachePath = path.join(cacheDir, srcKey.replace(/\//g, '_'));
+
+    // Serve from cache if available
+    if (fs.existsSync(cachePath)) {
+      const ext = path.extname(cachePath).toLowerCase();
+      if (ext === '.png') res.set('Content-Type', 'image/png');
+      else if (ext === '.jpg' || ext === '.jpeg') res.set('Content-Type', 'image/jpeg');
+      else if (ext === '.webp') res.set('Content-Type', 'image/webp');
       res.set('Cache-Control', 'public, max-age=86400');
-      obj.Body.pipe(res);
-    } else {
-      const filePath = path.join(uploadsDir, key);
-      if (!fs.existsSync(filePath)) return res.status(404).end();
-      if (filePath.endsWith('.png')) res.set('Content-Type', 'image/png');
-      else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) res.set('Content-Type', 'image/jpeg');
-      else if (filePath.endsWith('.webp')) res.set('Content-Type', 'image/webp');
-      res.set('Cache-Control', 'public, max-age=86400');
-      fs.createReadStream(filePath).pipe(res);
+      return fs.createReadStream(cachePath).pipe(res);
     }
-  } catch (e) { res.status(404).end(); }
+
+    // Try S3 if key is an S3 path
+    if (s3Client && s3Bucket) {
+      try {
+        const { GetObjectCommand } = require('@aws-sdk/client-s3');
+        const obj = await s3Client.send(new GetObjectCommand({ Bucket: s3Bucket, Key: srcKey }));
+        const ext = path.extname(srcKey).toLowerCase();
+        if (ext === '.png') res.set('Content-Type', 'image/png');
+        else if (ext === '.jpg' || ext === '.jpeg') res.set('Content-Type', 'image/jpeg');
+        else if (ext === '.webp') res.set('Content-Type', 'image/webp');
+        res.set('Cache-Control', 'public, max-age=86400');
+        // Pipe to response and cache locally
+        const ws = fs.createWriteStream(cachePath);
+        obj.Body.pipe(ws);
+        return obj.Body.pipe(res);
+      } catch (e) { console.error('S3 fetch error:', e.message, e.code); }
+    }
+
+    // Fallback: try local uploads dir
+    const localPath = path.join(uploadsDir, srcKey);
+    if (fs.existsSync(localPath)) {
+      const ext = path.extname(localPath).toLowerCase();
+      if (ext === '.png') res.set('Content-Type', 'image/png');
+      else if (ext === '.jpg' || ext === '.jpeg') res.set('Content-Type', 'image/jpeg');
+      else if (ext === '.webp') res.set('Content-Type', 'image/webp');
+      res.set('Cache-Control', 'public, max-age=86400');
+      return fs.createReadStream(localPath).pipe(res);
+    }
+
+    res.status(404).end();
+  } catch (e) { console.error('Image proxy error:', e.message, e.code); res.status(404).end(); }
 });
 
 // ========== AUTH ==========
