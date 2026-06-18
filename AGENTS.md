@@ -24,7 +24,7 @@
 
 ### Uploads
 - Max file size: 20MB (multer limit + clear error message)
-- `express.json({ limit: '20mb' })` also increased to match
+- `express.json()` default limit (100kb) is sufficient for JSON payloads (file uploads are multipart via multer, not JSON)
 - Image path stored in DB as `/uploads/filename.ext`
 - `keepImage` flag should be checked when updating product without changing image
 
