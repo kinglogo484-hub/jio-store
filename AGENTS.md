@@ -13,6 +13,11 @@
 - **Error handler MUST be after all routes** — in Express, `next(err)` only finds error handlers defined later in the middleware stack. If defined before routes, it never gets called.
 - Always send actual error message from server to client: `alert(e.message)` not `alert('Error')`
 
+### SQLite WAL Mode
+- Railway persistent volume may not support `WAL` journal mode (`SQLITE_IOERR_SHMSIZE`)
+- Always wrap `PRAGMA journal_mode = WAL` in try-catch, falling back to `DELETE` mode
+- Clean up stale `-wal` and `-shm` files on fallback`
+
 ### DOM Event Handling
 - **Use `addEventListener` NOT `onclick`** — especially inside forms. `onclick` can trigger form submit.
 - For "add tag" buttons: `type="button"` + `e.preventDefault()` + `addEventListener('click', ...)`

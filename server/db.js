@@ -66,7 +66,7 @@ if (DATABASE_URL) {
   const dbDir = path.dirname(dbPath);
   if (!fsMk.existsSync(dbDir)) fsMk.mkdirSync(dbDir, { recursive: true });
   const sqlite = new Database(dbPath);
-  sqlite.pragma('journal_mode = WAL');
+  try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); try { fsMk.unlinkSync(dbPath + '-wal'); } catch(e2){} try { fsMk.unlinkSync(dbPath + '-shm'); } catch(e2){} }
   sqlite.pragma('foreign_keys = ON');
   db = {
     async query(text, params) { return { rows: sqlite.prepare(text).all(...(params || [])) }; },
@@ -121,7 +121,7 @@ async function initDb() {
     const dbDir2 = path.dirname(dbPath2);
     if (!fsMk2.existsSync(dbDir2)) fsMk2.mkdirSync(dbDir2, { recursive: true });
     const sqlite = new Database(dbPath2);
-    sqlite.pragma('journal_mode = WAL');
+    try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); try { fs.unlinkSync(dbPath2 + '-wal'); } catch(e2){} try { fs.unlinkSync(dbPath2 + '-shm'); } catch(e2){} }
     sqlite.pragma('foreign_keys = ON');
 
     sqlite.exec(`
