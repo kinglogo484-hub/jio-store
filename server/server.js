@@ -308,6 +308,30 @@ app.use((err, req, res, next) => {
 });
 
 // ========== DB RECOVERY ==========
+app.post('/api/cleanup-volume', async (req, res) => {
+  const { key } = req.body || {};
+  if (key !== 'jio-reset-2026') return res.status(403).json({ message: 'Invalid key' });
+  const dataDir = '/data';
+  let deleted = [];
+  try {
+    if (fs.existsSync(dataDir)) {
+      for (const entry of fs.readdirSync(dataDir)) {
+        const fullPath = path.join(dataDir, entry);
+        try {
+          if (fs.statSync(fullPath).isDirectory()) {
+            fs.rmSync(fullPath, { recursive: true, force: true });
+          } else {
+            fs.unlinkSync(fullPath);
+          }
+          deleted.push(entry);
+        } catch(e) { deleted.push(entry + ' (failed: ' + e.message + ')'); }
+      }
+    }
+    res.json({ message: 'Volume cleaned', deleted, restarting: true });
+    process.exit(0);
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 app.post('/api/reset-db', async (req, res) => {
   const { key } = req.body;
   if (key !== 'jio-reset-2026') return res.status(403).json({ message: 'Invalid key' });
