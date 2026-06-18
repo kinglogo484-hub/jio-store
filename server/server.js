@@ -302,17 +302,24 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// ========== DB RECOVERY ==========
+app.post('/api/reset-db', async (req, res) => {
+  const { key } = req.body;
+  if (key !== 'jio-reset-2026') return res.status(403).json({ message: 'Invalid key' });
+  try {
+    const dbPath = process.env.SQLITE_PATH || path.join(__dirname, 'jio_store.db');
+    if (fs.existsSync(dbPath)) {
+      fs.renameSync(dbPath, dbPath + '.bak.' + Date.now());
+      try { if (fs.existsSync(dbPath + '-wal')) fs.unlinkSync(dbPath + '-wal'); } catch(e){}
+      try { if (fs.existsSync(dbPath + '-shm')) fs.unlinkSync(dbPath + '-shm'); } catch(e){}
+    }
+    res.json({ message: 'Database reset. Restarting...' });
+    process.exit(0);
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 // ========== START ==========
 initDb().then(() => {
-  // Clean up old local uploads (now using S3 bucket)
-  if (s3Client && s3Bucket) {
-    const oldFiles = fs.readdirSync(uploadsDir);
-    for (const file of oldFiles) {
-      if (file === '.gitkeep' || file === 'logo.png') continue;
-      try { fs.unlinkSync(path.join(uploadsDir, file)); } catch(e) {}
-    }
-    console.log('Cleaned up old local uploads');
-  }
   app.listen(PORT, () => {
     console.log(`JIO Store running at http://localhost:${PORT}`);
     console.log(`Admin panel at http://localhost:${PORT}/admin`);
