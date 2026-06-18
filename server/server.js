@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json({ limit: '20mb' }));
+app.use(express.json());
 
 // Ensure uploads dir exists
 const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, '..', 'uploads');

@@ -1,7 +1,7 @@
 FROM node:20-slim
 WORKDIR /app
 
-# Build dependencies for better-sqlite3
+# Build deps for better-sqlite3
 RUN apt-get update -qq && apt-get install -y -qq python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
