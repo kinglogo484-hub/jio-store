@@ -9,6 +9,8 @@ let S3Client, GetObjectCommand;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));
+
 app.use(cors());
 app.use(express.json());
 
@@ -151,15 +153,19 @@ app.get('/api/products/:id', async (req, res) => {
   res.json(product);
 });
 
-app.post('/api/products', upload.single('image'), async (req, res) => {
-  const { name, description, price, category, sizes, colors } = req.body;
-  if (!name || !price) return res.status(400).json({ message: 'Name and price are required' });
-  const image = await saveImage(req.file);
-  const product = await db.get(
-    'INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *',
-    [name, description || '', parseFloat(price), category || 'general', image, sizes || '', colors || '']
-  );
-  res.status(201).json(product);
+app.post('/api/products', upload.single('image'), async (req, res, next) => {
+  try {
+    const { name, description, price, category, sizes, colors } = req.body;
+    if (!name || !price) return res.status(400).json({ message: 'Name and price are required' });
+    console.log('Creating product:', name, 'file:', req.file?.originalname || 'none');
+    const image = await saveImage(req.file);
+    console.log('Image result:', image);
+    const product = await db.get(
+      'INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *',
+      [name, description || '', parseFloat(price), category || 'general', image, sizes || '', colors || '']
+    );
+    res.status(201).json(product);
+  } catch (e) { console.error('Product create error:', e.message, e.stack); next(e); }
 });
 
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
