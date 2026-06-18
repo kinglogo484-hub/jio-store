@@ -304,6 +304,15 @@ app.use((err, req, res, next) => {
 
 // ========== START ==========
 initDb().then(() => {
+  // Clean up old local uploads (now using S3 bucket)
+  if (s3Client && s3Bucket) {
+    const oldFiles = fs.readdirSync(uploadsDir);
+    for (const file of oldFiles) {
+      if (file === '.gitkeep' || file === 'logo.png') continue;
+      try { fs.unlinkSync(path.join(uploadsDir, file)); } catch(e) {}
+    }
+    console.log('Cleaned up old local uploads');
+  }
   app.listen(PORT, () => {
     console.log(`JIO Store running at http://localhost:${PORT}`);
     console.log(`Admin panel at http://localhost:${PORT}/admin`);
