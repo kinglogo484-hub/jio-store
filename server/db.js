@@ -65,8 +65,11 @@ if (DATABASE_URL) {
   const fsMk = require('fs');
   const dbDir = path.dirname(dbPath);
   if (!fsMk.existsSync(dbDir)) fsMk.mkdirSync(dbDir, { recursive: true });
+  // Clean up stale WAL files before opening (Railway volume may not support WAL)
+  try { if (fsMk.existsSync(dbPath + '-wal')) fsMk.unlinkSync(dbPath + '-wal'); } catch(e){}
+  try { if (fsMk.existsSync(dbPath + '-shm')) fsMk.unlinkSync(dbPath + '-shm'); } catch(e){}
   const sqlite = new Database(dbPath);
-  try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); try { fsMk.unlinkSync(dbPath + '-wal'); } catch(e2){} try { fsMk.unlinkSync(dbPath + '-shm'); } catch(e2){} }
+  try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); }
   sqlite.pragma('foreign_keys = ON');
   db = {
     async query(text, params) { return { rows: sqlite.prepare(text).all(...(params || [])) }; },
@@ -120,8 +123,11 @@ async function initDb() {
     const fsMk2 = require('fs');
     const dbDir2 = path.dirname(dbPath2);
     if (!fsMk2.existsSync(dbDir2)) fsMk2.mkdirSync(dbDir2, { recursive: true });
+    // Clean up stale WAL files before opening
+    try { if (fs.existsSync(dbPath2 + '-wal')) fs.unlinkSync(dbPath2 + '-wal'); } catch(e){}
+    try { if (fs.existsSync(dbPath2 + '-shm')) fs.unlinkSync(dbPath2 + '-shm'); } catch(e){}
     const sqlite = new Database(dbPath2);
-    try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); try { fs.unlinkSync(dbPath2 + '-wal'); } catch(e2){} try { fs.unlinkSync(dbPath2 + '-shm'); } catch(e2){} }
+    try { sqlite.pragma('journal_mode = WAL'); } catch (e) { sqlite.pragma('journal_mode = DELETE'); }
     sqlite.pragma('foreign_keys = ON');
 
     sqlite.exec(`
