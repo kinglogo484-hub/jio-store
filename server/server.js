@@ -77,6 +77,20 @@ function imageUrl(image) {
   return image;
 }
 
+// ========== DEBUG: check S3 status ==========
+app.get('/api/debug', (req, res) => {
+  res.json({
+    s3Client: !!s3Client,
+    s3Bucket: s3Bucket || null,
+    hasEndpoint: !!process.env.BUCKET_ENDPOINT,
+    hasKey: !!process.env.BUCKET_ACCESS_KEY_ID,
+    hasSecret: !!process.env.BUCKET_SECRET_ACCESS_KEY,
+    uploadsDir: uploadsDir,
+    cwd: process.cwd(),
+    dirname: __dirname,
+  });
+});
+
 // ========== IMAGE PROXY (serve from local cache or S3) ==========
 const cacheDir = path.join(__dirname, '..', '.imgcache');
 if (!fs.existsSync(cacheDir)) try { fs.mkdirSync(cacheDir, { recursive: true }); } catch(e) {}
@@ -111,12 +125,32 @@ app.get('/api/image/:key', async (req, res) => {
         else if (ext === '.jpg' || ext === '.jpeg') res.set('Content-Type', 'image/jpeg');
         else if (ext === '.webp') res.set('Content-Type', 'image/webp');
         res.set('Cache-Control', 'public, max-age=86400');
-        // Cache locally while streaming to response
-        const ws = fs.createWriteStream(cachePath);
-        obj.Body.on('data', chunk => { ws.write(chunk); res.write(chunk); });
-        obj.Body.on('end', () => { ws.end(); res.end(); });
-        obj.Body.on('error', err => { console.error('S3 stream error:', err.message); ws.end(); res.end(); });
-        return;
+        const body = obj.Body;
+        if (typeof body.pipe === 'function') {
+          const ws = fs.createWriteStream(cachePath);
+          body.pipe(ws);
+          return body.pipe(res);
+        } else if (typeof body.getReader === 'function') {
+          // Web Streams API
+          const reader = body.getReader();
+          const ws = fs.createWriteStream(cachePath);
+          const pump = () => reader.read().then(({ done, value }) => {
+            if (done) { ws.end(); res.end(); return; }
+            ws.write(Buffer.from(value));
+            res.write(Buffer.from(value));
+            return pump();
+          });
+          return pump();
+        } else if (typeof body.arrayBuffer === 'function') {
+          const buf = Buffer.from(await body.arrayBuffer());
+          fs.writeFile(cachePath, buf, () => {});
+          return res.end(buf);
+        } else if (body instanceof Buffer) {
+          fs.writeFile(cachePath, body, () => {});
+          return res.end(body);
+        }
+        console.error('Unknown body type:', typeof body, body?.constructor?.name);
+        res.status(500).end();
       } catch (e) { console.error('S3 fetch error:', e.message, e.code, e.stack); }
     }
 
