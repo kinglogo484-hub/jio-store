@@ -104,8 +104,10 @@ app.get('/api/image/:key', async (req, res) => {
     // Try S3 if key is an S3 path
     if (s3Client && s3Bucket) {
       try {
+        console.log('Fetching from S3:', srcKey, 'bucket:', s3Bucket);
         const { GetObjectCommand } = require('@aws-sdk/client-s3');
         const obj = await s3Client.send(new GetObjectCommand({ Bucket: s3Bucket, Key: srcKey }));
+        console.log('S3 response received, ContentType:', obj.ContentType);
         const ext = path.extname(srcKey).toLowerCase();
         if (ext === '.png') res.set('Content-Type', 'image/png');
         else if (ext === '.jpg' || ext === '.jpeg') res.set('Content-Type', 'image/jpeg');
@@ -115,7 +117,7 @@ app.get('/api/image/:key', async (req, res) => {
         const ws = fs.createWriteStream(cachePath);
         obj.Body.pipe(ws);
         return obj.Body.pipe(res);
-      } catch (e) { console.error('S3 fetch error:', e.message, e.code); }
+      } catch (e) { console.error('S3 fetch error:', e.message, e.code, e.stack); }
     }
 
     // Fallback: try local uploads dir
