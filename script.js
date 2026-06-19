@@ -1,5 +1,5 @@
 // ===== STATE =====
-function imgUrl(src) { if (!src) return ''; if (src.startsWith('s3:') || src.startsWith('/uploads/')) return '/api/image/' + src.replace('/uploads/', ''); return src; }
+function imgUrl(src) { if (!src) return ''; if (src.startsWith('s3:') || src.startsWith('/uploads/')) return '/api/image/' + encodeURIComponent(src.replace('/uploads/', '')); return src; }
 let products = [];
 let cart = JSON.parse(localStorage.getItem('jio_cart')) || [];
 let settings = {};

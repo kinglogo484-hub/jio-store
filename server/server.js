@@ -95,9 +95,9 @@ app.get('/api/debug', (req, res) => {
 const cacheDir = path.join(__dirname, '..', '.imgcache');
 if (!fs.existsSync(cacheDir)) try { fs.mkdirSync(cacheDir, { recursive: true }); } catch(e) {}
 
-app.get('/api/image/:key', async (req, res) => {
+app.get('/api/image/*', async (req, res) => {
   try {
-    let srcKey = req.params.key;
+    let srcKey = decodeURIComponent(req.params[0] || '');
     // Strip s3: prefix if present
     if (srcKey.startsWith('s3:')) srcKey = srcKey.slice(3);
     // Strip /uploads/ prefix if present

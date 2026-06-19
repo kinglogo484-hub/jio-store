@@ -254,7 +254,7 @@ window.editProduct = async function(id) {
       }
     });
     document.getElementById('prodImage').value = '';
-    const imgSrc = p.image.startsWith('s3:') || p.image.startsWith('/uploads/') ? '/api/image/' + p.image.replace('/uploads/', '') : p.image;
+    const imgSrc = p.image.startsWith('s3:') || p.image.startsWith('/uploads/') ? '/api/image/' + encodeURIComponent(p.image.replace('/uploads/', '')) : p.image;
     document.getElementById('currentImage').innerHTML = p.image ? `Current: <a href="${imgSrc}" target="_blank" style="color:#6b4423">${p.image}</a>` : 'No image';
     productModalTitle.textContent = 'Edit Product';
     productModal.classList.add('show');
