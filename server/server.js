@@ -4,7 +4,6 @@ const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 const { db, initDb } = require('./db');
-let S3Client, GetObjectCommand;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,20 +75,6 @@ function imageUrl(image) {
   if (image.startsWith('/uploads/')) return '/api/image/' + image.replace('/uploads/', '');
   return image;
 }
-
-// ========== DEBUG: check S3 status ==========
-app.get('/api/debug', (req, res) => {
-  res.json({
-    s3Client: !!s3Client,
-    s3Bucket: s3Bucket || null,
-    hasEndpoint: !!process.env.BUCKET_ENDPOINT,
-    hasKey: !!process.env.BUCKET_ACCESS_KEY_ID,
-    hasSecret: !!process.env.BUCKET_SECRET_ACCESS_KEY,
-    uploadsDir: uploadsDir,
-    cwd: process.cwd(),
-    dirname: __dirname,
-  });
-});
 
 // ========== IMAGE PROXY (serve from local cache or S3) ==========
 const cacheDir = path.join(__dirname, '..', '.imgcache');
