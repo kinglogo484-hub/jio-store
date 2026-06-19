@@ -3,7 +3,10 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
-const { db, initDb } = require('./db');
+let db, initDb;
+const dbModule = require('./db');
+db = dbModule.db;
+initDb = dbModule.initDb;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -408,24 +411,71 @@ app.post('/api/reset-db', async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+// ========== HEALTH ==========
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', db: process.env.SQLITE_PATH || 'default', uptime: process.uptime() });
+});
+
 // ========== START ==========
-initDb().then(async () => {
+(async function startup() {
+  // 1. Clean up stale files from the volume
   try {
-    await db.get('PRAGMA integrity_check');
-  } catch (e) {
-    console.error('Database corrupted, recreating...');
-    const dbPath = process.env.SQLITE_PATH || path.join(__dirname, 'jio_store.db');
-    try { fs.renameSync(dbPath, dbPath + '.bak.' + Date.now()); } catch(e2){}
-    try { if (fs.existsSync(dbPath + '-wal')) fs.unlinkSync(dbPath + '-wal'); } catch(e2){}
-    try { if (fs.existsSync(dbPath + '-shm')) fs.unlinkSync(dbPath + '-shm'); } catch(e2){}
-    const { initDb: initAgain } = require('./db');
-    await initAgain();
+    if (fs.existsSync('/data/')) {
+      for (const entry of fs.readdirSync('/data/')) {
+        if (entry === 'lost+found') continue;
+        try { fs.rmSync(path.join('/data/', entry), { recursive: true, force: true }); } catch(e){}
+      }
+      console.log('Volume /data/ cleaned');
+    }
+  } catch (e) { console.error('Volume cleanup failed (non-fatal):', e.message); }
+
+  // 2. Ensure DB is on persistent storage
+  const dbPath = process.env.SQLITE_PATH || '/data/jio_store.db';
+  if (dbPath.startsWith('/data/')) {
+    const appDb = '/app/jio_store.db';
+    try {
+      if (!fs.existsSync(dbPath) && fs.existsSync(appDb)) {
+        const dir = path.dirname(dbPath);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.copyFileSync(appDb, dbPath);
+        console.log('Copied DB from', appDb, 'to', dbPath);
+      }
+    } catch (e) { console.error('DB copy failed (non-fatal):', e.message); }
   }
+
+  // 3. Initialize DB with retry
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await initDb();
+      const integrity = await db.get('PRAGMA integrity_check');
+      if (integrity && integrity['integrity_check'] !== 'ok') throw new Error('Integrity check failed: ' + JSON.stringify(integrity));
+      console.log('Database OK at', dbPath);
+      break;
+    } catch (e) {
+      console.error(`DB init attempt ${attempt + 1} failed:`, e.message);
+      if (attempt < 2) {
+        try {
+          const bak = dbPath + '.bak.' + Date.now();
+          if (fs.existsSync(dbPath)) fs.renameSync(dbPath, bak);
+          console.log('Backed up corrupted DB to', bak);
+        } catch(e2) {}
+        try { if (fs.existsSync(dbPath + '-wal')) fs.unlinkSync(dbPath + '-wal'); } catch(e2){}
+        try { if (fs.existsSync(dbPath + '-shm')) fs.unlinkSync(dbPath + '-shm'); } catch(e2){}
+        // Re-require fresh db module
+        delete require.cache[require.resolve('./db')];
+        const fresh = require('./db');
+        db = fresh.db;
+        initDb = fresh.initDb;
+      } else {
+        console.error('Failed to initialize DB after 3 attempts');
+        process.exit(1);
+      }
+    }
+  }
+
   app.listen(PORT, () => {
     console.log(`JIO Store running at http://localhost:${PORT}`);
     console.log(`Admin panel at http://localhost:${PORT}/admin`);
+    console.log(`DB: ${dbPath}`);
   });
-}).catch(err => {
-  console.error('Failed to initialize database:', err);
-  process.exit(1);
-});
+})();
