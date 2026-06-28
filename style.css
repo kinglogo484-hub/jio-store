@@ -435,6 +435,31 @@ nav.scrolled {
   color: #f5f0e8;
   border-color: #6b4423;
 }
+.size-chart-inline {
+  margin: 10px 0 12px;
+}
+.size-chart-inline table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.size-chart-inline th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 2px solid #d4c5a9;
+  color: #6b4423;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.size-chart-inline td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #ede6d9;
+  color: rgba(61,43,31,0.7);
+}
+.size-chart-inline tr:last-child td {
+  border-bottom: none;
+}
 
 .add-to-cart {
   width: 100%;

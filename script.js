@@ -112,6 +112,7 @@ function renderProducts(filter = 'all') {
         ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map(s => `<button class="opt-btn ${sel.size === s ? 'selected' : ''}" data-pid="${p.id}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
         ${colors.length ? `<div class="opt-group"><span class="opt-label">Color</span><div class="opt-options">${colors.map(c => `<button class="opt-btn ${sel.color === c ? 'selected' : ''}" data-pid="${p.id}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
         <div class="price">${p.old_price ? `<span class="old-price">EGP ${Number(p.old_price).toFixed(2)}</span> ` : ''}EGP ${Number(p.price).toFixed(2)}</div>
+        ${p.size_chart ? `<div class="size-chart-inline"><table><thead><tr><th translate="no">Size</th><th>Length</th><th>Width</th></tr></thead><tbody>${p.size_chart.split('|').filter(Boolean).map(r => { const [s,l,w] = r.split(',').map(x => x.trim()); return `<tr><td translate="no">${s}</td><td>${l}</td><td>${w}</td></tr>`; }).join('')}</tbody></table></div>` : ''}
         <button class="add-to-cart" data-id="${p.id}">Add to Cart</button>
       </div>
     </div>`}).join('');
