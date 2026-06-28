@@ -261,35 +261,13 @@ function setupEventListeners() {
     });
   });
 
-  // Open product detail on card click
+  // Unified click handler for grid
   productGrid.addEventListener('click', e => {
+    const addBtn = e.target.closest('.add-to-cart');
+    const optBtn = e.target.closest('.opt-btn');
     const card = e.target.closest('.product-card');
-    const btn = e.target.closest('.add-to-cart');
-    const opt = e.target.closest('.opt-btn');
-    if (!card || btn || opt) return;
-    const id = parseInt(card.dataset.id);
-    const product = products.find(p => p.id === id);
-    if (product) openProductDetail(product);
-  });
-
-  // Size/Color option buttons in grid (delegated)
-  productGrid.addEventListener('click', e => {
-    const btn = e.target.closest('.opt-btn');
-    if (btn) {
-      const pid = parseInt(btn.dataset.pid);
-      const type = btn.dataset.type;
-      const val = btn.dataset.val;
-      if (!selectedOptions[pid]) selectedOptions[pid] = {};
-      selectedOptions[pid][type] = selectedOptions[pid][type] === val ? '' : val;
-      renderProducts(document.querySelector('.filter-btn.active')?.dataset?.filter || 'all');
-    }
-  });
-
-  // Add to cart from grid (delegated)
-  productGrid.addEventListener('click', e => {
-    const btn = e.target.closest('.add-to-cart');
-    if (btn) {
-      const id = parseInt(btn.dataset.id);
+    if (addBtn) {
+      const id = parseInt(addBtn.dataset.id);
       const product = products.find(p => p.id === id);
       if (!product) return;
       const sizes = product.sizes ? product.sizes.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -298,6 +276,17 @@ function setupEventListeners() {
       if (sizes.length && !opts.size) { alert('Please select a size'); return; }
       if (colors.length && !opts.color) { alert('Please select a color'); return; }
       addToCart(product);
+    } else if (optBtn) {
+      const pid = parseInt(optBtn.dataset.pid);
+      const type = optBtn.dataset.type;
+      const val = optBtn.dataset.val;
+      if (!selectedOptions[pid]) selectedOptions[pid] = {};
+      selectedOptions[pid][type] = selectedOptions[pid][type] === val ? '' : val;
+      renderProducts(document.querySelector('.filter-btn.active')?.dataset?.filter || 'all');
+    } else if (card) {
+      const id = parseInt(card.dataset.id);
+      const product = products.find(p => p.id === id);
+      if (product) openProductDetail(product);
     }
   });
 
