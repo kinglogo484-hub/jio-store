@@ -29,6 +29,7 @@ let detailProduct = null;
 const API = {
   async get(endpoint) {
     const res = await fetch(endpoint);
+    if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
   async post(endpoint, data) {
@@ -37,6 +38,7 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    if (!res.ok) throw new Error(await res.text());
     return res.json();
   }
 };
@@ -224,7 +226,7 @@ async function placeOrder(data) {
     checkoutModal.classList.remove('show');
     successModal.classList.add('show');
   } catch (e) {
-    alert('Failed to place order. Please try again.');
+    alert(e.message || 'Failed to place order. Please try again.');
   }
 }
 

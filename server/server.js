@@ -231,17 +231,19 @@ app.get('/api/orders/:id', async (req, res) => {
   res.json(order);
 });
 
-app.post('/api/orders', async (req, res) => {
-  const { customer_name, customer_phone, customer_address, items, total, shipping_fee, payment_method, notes } = req.body;
-  if (!customer_name || !customer_phone || !items) {
-    return res.status(400).json({ message: 'Name, phone, and items are required' });
-  }
-  const order = await db.get(
-    'INSERT INTO orders (customer_name, customer_phone, customer_address, items, total, shipping_fee, payment_method, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *',
-    [customer_name, customer_phone, customer_address || '', JSON.stringify(items),
-     parseFloat(total) || 0, parseFloat(shipping_fee) || 0, payment_method || '', notes || '']
-  );
-  res.status(201).json(order);
+app.post('/api/orders', async (req, res, next) => {
+  try {
+    const { customer_name, customer_phone, customer_address, items, total, shipping_fee, payment_method, notes } = req.body;
+    if (!customer_name || !customer_phone || !items) {
+      return res.status(400).json({ message: 'Name, phone, and items are required' });
+    }
+    const order = await db.get(
+      'INSERT INTO orders (customer_name, customer_phone, customer_address, items, total, shipping_fee, payment_method, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *',
+      [customer_name, customer_phone, customer_address || '', JSON.stringify(items),
+       parseFloat(total) || 0, parseFloat(shipping_fee) || 0, payment_method || '', notes || '']
+    );
+    res.status(201).json(order);
+  } catch (e) { console.error('Order create error:', e.message); next(e); }
 });
 
 app.put('/api/orders/:id', async (req, res) => {
