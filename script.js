@@ -422,7 +422,7 @@ function openProductDetail(product) {
       <h2>${product.name}</h2>
       <p class="detail-desc">${product.description || ''}</p>
       <div class="detail-price">${product.old_price ? `<span class="old-price">EGP ${Number(product.old_price).toFixed(2)}</span> ` : ''}EGP ${Number(product.price).toFixed(2)}${product.old_price ? ` <span class="discount-badge">-${Math.round((1 - product.price / product.old_price) * 100)}%</span>` : ''}</div>
-      ${product.size_chart ? `<button class="size-chart-btn" onclick="openSizeChart('${product.name.replace(/'/g, "\\'")}', '${product.size_chart.replace(/'/g, "\\'")}')">Size Chart</button>` : ''}
+      ${product.size_chart ? `<div class="size-chart-inline"><table><thead><tr><th translate="no">Size</th><th>Length</th><th>Width</th></tr></thead><tbody>${product.size_chart.split('|').filter(Boolean).map(r => { const [s,l,w] = r.split(',').map(x => x.trim()); return `<tr><td translate="no">${s}</td><td>${l}</td><td>${w}</td></tr>`; }).join('')}</tbody></table></div>` : ''}
       <div class="detail-options">
         ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map((s,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
         ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map((c,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
