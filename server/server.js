@@ -192,7 +192,6 @@ app.post('/api/products', upload.single('image'), async (req, res, next) => {
 
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
   const { name, description, price, old_price, category, sizes, colors, keepImage, size_chart } = req.body;
-  const { name, description, price, old_price, category, sizes, colors, keepImage, size_chart } = req.body;
   const existing = await db.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Product not found' });
   let image = existing.image;
