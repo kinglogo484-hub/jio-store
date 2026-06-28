@@ -179,31 +179,32 @@ app.get('/api/products/:id', async (req, res) => {
 
 app.post('/api/products', upload.single('image'), async (req, res, next) => {
   try {
-    const { name, description, price, category, sizes, colors } = req.body;
+    const { name, description, price, old_price, category, sizes, colors, size_chart } = req.body;
     if (!name || !price) return res.status(400).json({ message: 'Name and price are required' });
-    console.log('Creating product:', name, 'file:', req.file?.originalname || 'none');
     const image = await saveImage(req.file);
-    console.log('Image result:', image);
     const product = await db.get(
-      'INSERT INTO products (name, description, price, category, image, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *',
-      [name, description || '', parseFloat(price), category || 'general', image, sizes || '', colors || '']
+      'INSERT INTO products (name, description, price, old_price, category, image, sizes, colors, size_chart) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *',
+      [name, description || '', parseFloat(price), old_price ? parseFloat(old_price) : null, category || 'general', image, sizes || '', colors || '', size_chart || '']
     );
     res.status(201).json(product);
   } catch (e) { console.error('Product create error:', e.message, e.stack); next(e); }
 });
 
 app.put('/api/products/:id', upload.single('image'), async (req, res) => {
-  const { name, description, price, category, sizes, colors, keepImage } = req.body;
+  const { name, description, price, old_price, category, sizes, colors, keepImage, size_chart } = req.body;
   const existing = await db.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
   if (!existing) return res.status(404).json({ message: 'Product not found' });
   let image = existing.image;
   if (req.file) image = await saveImage(req.file);
   else if (keepImage === 'false' || keepImage === false) image = '';
   const updated = await db.get(
-    'UPDATE products SET name=?, description=?, price=?, category=?, image=?, sizes=?, colors=? WHERE id=? RETURNING *',
+    'UPDATE products SET name=?, description=?, price=?, old_price=?, category=?, image=?, sizes=?, colors=?, size_chart=? WHERE id=? RETURNING *',
     [name || existing.name, description !== undefined ? description : existing.description,
-     price ? parseFloat(price) : existing.price, category || existing.category, image,
-     sizes !== undefined ? sizes : existing.sizes, colors !== undefined ? colors : existing.colors, req.params.id]
+     price ? parseFloat(price) : existing.price,
+     old_price !== undefined ? (old_price ? parseFloat(old_price) : null) : existing.old_price,
+     category || existing.category, image,
+     sizes !== undefined ? sizes : existing.sizes, colors !== undefined ? colors : existing.colors,
+     size_chart !== undefined ? size_chart : existing.size_chart, req.params.id]
   );
   res.json(updated);
 });

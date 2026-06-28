@@ -111,7 +111,7 @@ function renderProducts(filter = 'all') {
         <p class="desc">${p.description || ''}</p>
         ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map(s => `<button class="opt-btn ${sel.size === s ? 'selected' : ''}" data-pid="${p.id}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
         ${colors.length ? `<div class="opt-group"><span class="opt-label">Color</span><div class="opt-options">${colors.map(c => `<button class="opt-btn ${sel.color === c ? 'selected' : ''}" data-pid="${p.id}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
-        <div class="price">EGP ${Number(p.price).toFixed(2)}</div>
+        <div class="price">${p.old_price ? `<span class="old-price">EGP ${Number(p.old_price).toFixed(2)}</span> ` : ''}EGP ${Number(p.price).toFixed(2)}</div>
         <button class="add-to-cart" data-id="${p.id}">Add to Cart</button>
       </div>
     </div>`}).join('');
@@ -420,7 +420,8 @@ function openProductDetail(product) {
       <span class="detail-category">${product.category}</span>
       <h2>${product.name}</h2>
       <p class="detail-desc">${product.description || ''}</p>
-      <div class="detail-price">EGP ${Number(product.price).toFixed(2)}</div>
+      <div class="detail-price">${product.old_price ? `<span class="old-price">EGP ${Number(product.old_price).toFixed(2)}</span> ` : ''}EGP ${Number(product.price).toFixed(2)}${product.old_price ? ` <span class="discount-badge">-${Math.round((1 - product.price / product.old_price) * 100)}%</span>` : ''}</div>
+      ${product.size_chart ? `<button class="size-chart-btn" onclick="openSizeChart('${product.name.replace(/'/g, "\\'")}', '${product.size_chart.replace(/'/g, "\\'")}')">Size Chart</button>` : ''}
       <div class="detail-options">
         ${sizes.length ? `<div class="opt-group"><span class="opt-label">Size</span><div class="opt-options">${sizes.map((s,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="size" data-val="${s}" translate="no">${s}</button>`).join('')}</div></div>` : ''}
         ${colors.length ? `<div class="opt-group" style="margin-top:12px"><span class="opt-label">Color</span><div class="opt-options">${colors.map((c,i) => `<button class="opt-btn${i===0?' selected':''}" data-type="color" data-val="${c}" translate="no">${c}</button>`).join('')}</div></div>` : ''}
@@ -488,6 +489,18 @@ function openProductDetail(product) {
     closeDetail();
     openCheckout();
   });
+}
+
+function openSizeChart(name, data) {
+  document.getElementById('sizeChartTitle').textContent = name + ' - Size Chart';
+  const tbody = document.getElementById('sizeChartBody');
+  const rows = data.split('|').filter(Boolean);
+  tbody.innerHTML = rows.map(r => {
+    const [size, length, width] = r.split(',').map(s => s.trim());
+    return `<tr><td style="padding:10px 12px;border-bottom:1px solid #e0d5c5;font-weight:600" translate="no">${size}</td><td style="padding:10px 12px;border-bottom:1px solid #e0d5c5">${length}</td><td style="padding:10px 12px;border-bottom:1px solid #e0d5c5">${width}</td></tr>`;
+  }).join('');
+  document.getElementById('sizeChartModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeDetail() {

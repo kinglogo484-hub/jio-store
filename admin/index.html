@@ -132,6 +132,7 @@
         <div class="form-group"><label>Product Name *</label><input type="text" id="prodName" required></div>
         <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2"></textarea></div>
         <div class="form-group"><label>Price (EGP) *</label><input type="number" id="prodPrice" step="0.01" required></div>
+        <div class="form-group"><label>Old Price (EGP) — optional, for discount display</label><input type="number" id="prodOldPrice" step="0.01" style="opacity:0.7"></div>
         <div class="form-group half-row">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div>
@@ -188,6 +189,18 @@
             <option value="Accessories">Accessories</option>
             <option value="general">General</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Size Chart</label>
+          <div style="font-size:11px;color:rgba(61,43,31,0.5);margin-bottom:8px">Add measurements for each size (optional)</div>
+          <div id="sizeChartContainer">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4c5a9;color:#6b4423;font-size:11px">Size</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4c5a9;color:#6b4423;font-size:11px">Length (cm)</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid #d4c5a9;color:#6b4423;font-size:11px">Width (cm)</th><th style="width:30px"></th></tr></thead>
+              <tbody id="sizeChartRows"></tbody>
+            </table>
+          </div>
+          <button type="button" id="addSizeChartRow" style="margin-top:8px;padding:6px 14px;background:#e0d5c5;border:none;color:#3d2b1f;font-size:11px;cursor:pointer">+ Add Row</button>
+          <input type="hidden" id="prodSizeChart">
         </div>
         <div class="form-group">
           <label>Product Image</label>

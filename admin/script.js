@@ -2,6 +2,40 @@
 let isLoggedIn = false;
 let currentTab = 'dashboard';
 
+// ===== Size Chart Helpers =====
+function renderSizeChart(data) {
+  const tbody = document.getElementById('sizeChartRows');
+  const rows = data ? data.split('|').filter(Boolean) : [];
+  tbody.innerHTML = rows.map((row, i) => {
+    const [size, length, width] = row.split(',').map(s => s.trim());
+    return `<tr><td style="padding:4px"><input type="text" class="sc-size" value="${size}" placeholder="M" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><input type="number" class="sc-length" value="${length}" placeholder="70" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><input type="number" class="sc-width" value="${width}" placeholder="50" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><button type="button" onclick="this.closest('tr').remove();updateSizeChartValue()" style="background:none;border:none;color:#c0392b;font-size:18px;cursor:pointer">&times;</button></td></tr>`;
+  }).join('');
+}
+
+function updateSizeChartValue() {
+  const rows = document.querySelectorAll('#sizeChartRows tr');
+  const data = [...rows].map(tr => {
+    const size = tr.querySelector('.sc-size')?.value?.trim();
+    const length = tr.querySelector('.sc-length')?.value?.trim();
+    const width = tr.querySelector('.sc-width')?.value?.trim();
+    if (size && length && width) return [size, length, width].join(',');
+    return '';
+  }).filter(Boolean).join('|');
+  document.getElementById('prodSizeChart').value = data;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('addSizeChartRow')?.addEventListener('click', () => {
+    const tbody = document.getElementById('sizeChartRows');
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td style="padding:4px"><input type="text" class="sc-size" placeholder="M" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><input type="number" class="sc-length" placeholder="70" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><input type="number" class="sc-width" placeholder="50" style="width:100%;padding:6px 8px;border:1px solid #d4c5a9;background:#fff;color:#3d2b1f;font-size:12px"></td><td style="padding:4px"><button type="button" onclick="this.closest(\'tr\').remove();updateSizeChartValue()" style="background:none;border:none;color:#c0392b;font-size:18px;cursor:pointer">&times;</button></td>';
+    tbody.appendChild(tr);
+    updateSizeChartValue();
+  });
+  // Update hidden input on input change
+  document.getElementById('sizeChartContainer')?.addEventListener('input', updateSizeChartValue);
+});
+
 // ===== DOM =====
 const loginScreen = document.getElementById('loginScreen');
 const adminApp = document.getElementById('adminApp');
@@ -189,11 +223,13 @@ productForm.addEventListener('submit', async e => {
   fd.append('name', document.getElementById('prodName').value);
   fd.append('description', document.getElementById('prodDesc').value);
   fd.append('price', document.getElementById('prodPrice').value);
+  fd.append('old_price', document.getElementById('prodOldPrice').value || '');
   fd.append('category', document.getElementById('prodCategory').value);
   const sizes = [...document.querySelectorAll('#sizeSelector input:checked')].map(c => c.value).join(', ');
   const colors = [...document.querySelectorAll('#colorSelector input:checked')].map(c => c.value).join(', ');
   fd.append('sizes', sizes);
   fd.append('colors', colors);
+  fd.append('size_chart', document.getElementById('prodSizeChart').value);
   const fileInput = document.getElementById('prodImage');
   if (fileInput.files.length > 0) {
     fd.append('image', fileInput.files[0]);
@@ -227,6 +263,7 @@ window.editProduct = async function(id) {
     document.getElementById('prodName').value = p.name;
     document.getElementById('prodDesc').value = p.description;
     document.getElementById('prodPrice').value = p.price;
+    document.getElementById('prodOldPrice').value = p.old_price || '';
     document.getElementById('prodCategory').value = p.category;
     // Check the correct sizes/colors
     const sizeVals = (p.sizes || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -253,6 +290,7 @@ window.editProduct = async function(id) {
         document.getElementById('colorSelector').appendChild(label);
       }
     });
+    renderSizeChart(p.size_chart || '');
     document.getElementById('prodImage').value = '';
     const imgSrc = p.image.startsWith('s3:') || p.image.startsWith('/uploads/') ? '/api/image/' + encodeURIComponent(p.image.replace('/uploads/', '')) : p.image;
     document.getElementById('currentImage').innerHTML = p.image ? `Current: <a href="${imgSrc}" target="_blank" style="color:#6b4423">${p.image}</a>` : 'No image';

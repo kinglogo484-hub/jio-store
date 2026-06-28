@@ -399,6 +399,42 @@ nav.scrolled {
   margin-bottom: 16px;
   color: #6b4423;
 }
+.old-price {
+  font-size: 16px;
+  color: rgba(61,43,31,0.3);
+  text-decoration: line-through;
+  font-weight: 400;
+  margin-right: 8px;
+}
+.discount-badge {
+  font-size: 12px;
+  background: #e74c3c;
+  color: #fff;
+  padding: 2px 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.size-chart-btn {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #d4c5a9;
+  color: #6b4423;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.size-chart-btn:hover {
+  background: #6b4423;
+  color: #f5f0e8;
+  border-color: #6b4423;
+}
 
 .add-to-cart {
   width: 100%;

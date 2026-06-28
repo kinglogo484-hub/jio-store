@@ -86,7 +86,7 @@ if (DATABASE_URL) {
 async function initDb() {
   if (DATABASE_URL) {
     // PostgreSQL schema
-    await db.run('CREATE TABLE IF NOT EXISTS products (id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT DEFAULT \'\', price REAL NOT NULL, category TEXT DEFAULT \'general\', image TEXT DEFAULT \'\', sizes TEXT DEFAULT \'\', colors TEXT DEFAULT \'\', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+    await db.run('CREATE TABLE IF NOT EXISTS products (id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT DEFAULT \'\', price REAL NOT NULL, old_price REAL, size_chart TEXT DEFAULT \'\', category TEXT DEFAULT \'general\', image TEXT DEFAULT \'\', sizes TEXT DEFAULT \'\', colors TEXT DEFAULT \'\', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
     await db.run('CREATE TABLE IF NOT EXISTS orders (id SERIAL PRIMARY KEY, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, customer_address TEXT DEFAULT \'\', items TEXT NOT NULL, total REAL NOT NULL, shipping_fee REAL DEFAULT 0, status TEXT DEFAULT \'pending\', payment_method TEXT DEFAULT \'\', notes TEXT DEFAULT \'\', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
     await db.run('CREATE TABLE IF NOT EXISTS payment_info (id SERIAL PRIMARY KEY, method TEXT NOT NULL, number TEXT NOT NULL, holder_name TEXT DEFAULT \'\', is_active INTEGER DEFAULT 1)');
     await db.run('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
@@ -131,7 +131,7 @@ async function initDb() {
     sqlite.pragma('foreign_keys = ON');
 
     sqlite.exec(`
-      CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, description TEXT DEFAULT '', price REAL NOT NULL, category TEXT DEFAULT 'general', image TEXT DEFAULT '', sizes TEXT DEFAULT '', colors TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
+      CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, description TEXT DEFAULT '', price REAL NOT NULL, old_price REAL, size_chart TEXT DEFAULT '', category TEXT DEFAULT 'general', image TEXT DEFAULT '', sizes TEXT DEFAULT '', colors TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, customer_phone TEXT NOT NULL, customer_address TEXT DEFAULT '', items TEXT NOT NULL, total REAL NOT NULL, shipping_fee REAL DEFAULT 0, status TEXT DEFAULT 'pending', payment_method TEXT DEFAULT '', notes TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS payment_info (id INTEGER PRIMARY KEY AUTOINCREMENT, method TEXT NOT NULL, number TEXT NOT NULL, holder_name TEXT DEFAULT '', is_active INTEGER DEFAULT 1);
       CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -140,6 +140,8 @@ async function initDb() {
     `);
     try { sqlite.exec('ALTER TABLE products ADD COLUMN sizes TEXT DEFAULT ""'); } catch (e) {}
     try { sqlite.exec('ALTER TABLE products ADD COLUMN colors TEXT DEFAULT ""'); } catch (e) {}
+    try { sqlite.exec('ALTER TABLE products ADD COLUMN old_price REAL'); } catch (e) {}
+    try { sqlite.exec('ALTER TABLE products ADD COLUMN size_chart TEXT DEFAULT ""'); } catch (e) {}
 
     if (!fs.existsSync(path.join(__dirname, '..', 'uploads'))) fs.mkdirSync(path.join(__dirname, '..', 'uploads'), { recursive: true });
 
