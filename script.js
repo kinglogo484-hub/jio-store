@@ -48,6 +48,10 @@ async function init() {
   await loadSettings();
   await loadProducts();
   await loadShippingRates();
+  // Validate cart: remove items whose product no longer exists
+  const validIds = products.map(p => p.id);
+  cart = cart.filter(item => validIds.includes(item.id));
+  saveCart();
   renderProducts();
   renderCart();
   setupEventListeners();
