@@ -232,7 +232,9 @@ productForm.addEventListener('submit', async e => {
   fd.append('sizes', sizes);
   fd.append('colors', colors);
   updateSizeChartValue();
-  fd.append('size_chart', document.getElementById('prodSizeChart').value);
+  const sc = document.getElementById('prodSizeChart').value;
+  console.log('Size chart value:', sc, 'entries:', sc ? sc.split('|').length : 0);
+  fd.append('size_chart', sc);
   const fileInput = document.getElementById('prodImage');
   if (fileInput.files.length > 0) {
     fd.append('image', fileInput.files[0]);
