@@ -195,6 +195,8 @@ document.getElementById('addProductBtn').addEventListener('click', () => {
   productForm.reset();
   document.getElementById('productId').value = '';
   document.getElementById('currentImage').textContent = '';
+  document.getElementById('sizeChartRows').innerHTML = '';
+  document.getElementById('prodSizeChart').value = '';
   productModalTitle.textContent = 'Add Product';
   // Remove custom tags
   document.querySelectorAll('#sizeSelector .tag-option').forEach(el => {
@@ -229,6 +231,7 @@ productForm.addEventListener('submit', async e => {
   const colors = [...document.querySelectorAll('#colorSelector input:checked')].map(c => c.value).join(', ');
   fd.append('sizes', sizes);
   fd.append('colors', colors);
+  updateSizeChartValue();
   fd.append('size_chart', document.getElementById('prodSizeChart').value);
   const fileInput = document.getElementById('prodImage');
   if (fileInput.files.length > 0) {
