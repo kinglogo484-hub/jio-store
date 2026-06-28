@@ -48,9 +48,16 @@ async function init() {
   await loadSettings();
   await loadProducts();
   await loadShippingRates();
-  // Validate cart: remove items whose product no longer exists
+  // Validate & deduplicate cart
   const validIds = products.map(p => p.id);
-  cart = cart.filter(item => validIds.includes(item.id));
+  const seen = new Set();
+  cart = cart.filter(item => {
+    if (!validIds.includes(item.id)) return false;
+    const key = item.id + '|' + (item.selectedSize || '') + '|' + (item.selectedColor || '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   saveCart();
   renderProducts();
   renderCart();
